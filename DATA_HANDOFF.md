@@ -24,3 +24,9 @@ python3 scratch/sample_local_parquet.py
 ```
 
 *Note: The intermediate raw `hinval.parquet` is deleted after sampling to prevent bloating the repository.*
+
+## Index Rebuilding Details
+*   **Re-indexing Date**: 2026-08-14
+*   **Vector Database**: FAISS (IndexFlatL2)
+*   **Dimensions**: 384
+*   **Embedding Model**: `intfloat/multilingual-e5-small`

@@ -26,4 +26,4 @@ CHUNK_OVERLAP = 50
 RETRIEVAL_K = 3
 
 # Embedding settings
-EMBEDDING_MODEL_NAME = "sentence-transformers/all-MiniLM-L6-v2"
+EMBEDDING_MODEL_NAME = "intfloat/multilingual-e5-small"

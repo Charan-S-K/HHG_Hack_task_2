@@ -28,3 +28,8 @@ Each record in the dataset is a dictionary representing a question-answering tas
 *   **Source Size**: The full validation split of `ai4bharat/MSMARCO-XI` for Hindi (`validation/hinval.parquet`) is **461.88 MB** containing **97,941** records. The training split (`train/hintrain.parquet`) is **3.72 GB**.
 *   **Subset Choice**: We sampled a subset of **100 records** containing **998 passages** (averaging ~10 passages per query).
 *   **Justification**: This subset size (100 queries / 998 passages) is large enough to build a representative FAISS vector store index (~1,000 embedded chunks) for testing retrieval and generation, while remaining small enough to run quickly on free-tier compute, require minimal memory, build the index in under 10 seconds, and fit within Git file size limits (~2.2 MB total size) without needing Git LFS.
+
+## Embedding Model Update (Re-indexing)
+*   **Update Date**: 2026-08-14
+*   **New Embedding Model**: `intfloat/multilingual-e5-small` (dimension: 384)
+*   **Reasoning**: The previous embedding model (`all-MiniLM-L6-v2`) is English-only and mapped Devanagari query/passage characters to generic `[UNK]` tokens, destroying semantic retrieval. The new multilingual E5 model is specifically trained for multilingual retrieval and supports Devanagari. We prepend `query: ` and `passage: ` prefixes to queries and documents respectively for optimal semantic alignment.

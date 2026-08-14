@@ -20,7 +20,9 @@ def embed_texts(texts):
     Returns a numpy array of embeddings.
     """
     model = get_embedding_model()
-    return model.encode(texts, convert_to_numpy=True)
+    # Prepend 'passage: ' prefix required by E5 models
+    prefixed_texts = [f"passage: {t}" for t in texts]
+    return model.encode(prefixed_texts, convert_to_numpy=True)
 
 def embed_query(query):
     """
@@ -28,4 +30,6 @@ def embed_query(query):
     Returns a numpy array representation.
     """
     model = get_embedding_model()
-    return model.encode(query, convert_to_numpy=True)
+    # Prepend 'query: ' prefix required by E5 models
+    prefixed_query = f"query: {query}"
+    return model.encode(prefixed_query, convert_to_numpy=True)

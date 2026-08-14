@@ -18,6 +18,7 @@ env/
 # Environment configurations and secrets
 .env
 .env.local
+audit_review.txt
 
 # IDE configurations
 .vscode/
