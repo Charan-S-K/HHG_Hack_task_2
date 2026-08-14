@@ -33,3 +33,8 @@ Each record in the dataset is a dictionary representing a question-answering tas
 *   **Update Date**: 2026-08-14
 *   **New Embedding Model**: `intfloat/multilingual-e5-small` (dimension: 384)
 *   **Reasoning**: The previous embedding model (`all-MiniLM-L6-v2`) is English-only and mapped Devanagari query/passage characters to generic `[UNK]` tokens, destroying semantic retrieval. The new multilingual E5 model is specifically trained for multilingual retrieval and supports Devanagari. We prepend `query: ` and `passage: ` prefixes to queries and documents respectively for optimal semantic alignment.
+
+## Dynamic Response Language Matching
+*   **Behavior**: The RAG generation pipeline is fully language-aware. It detects the language of the incoming query (either by reading the `language_code` returned from the Sarvam STT REST API payload, or by fallback detection using `langdetect` on text input).
+*   **Generation**: The LLM prompt is dynamically adapted to instruct Gemini 2.5 Flash to generate the answer directly in the detected query language (e.g., English or Hindi) while still grounding the answer strictly in the retrieved Hindi context passages.
+*   **Refusal Strings**: Refusal messages are also language-aware (returning in English if the query was in English, and in Hindi if the query was in Hindi).

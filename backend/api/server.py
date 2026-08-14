@@ -9,6 +9,7 @@ from backend.config import PROJECT_ROOT, HOST, PORT
 from backend.stt.sarvam_stt import transcribe_audio
 from backend.retrieval.retriever import retrieve_top_k
 from backend.llm_provider.gemini_llm import generate_answer
+from backend.utils.lang_detect import detect_language_name
 
 app = FastAPI(title="HH Goa Voice Radar API")
 
@@ -23,6 +24,7 @@ app.add_middleware(
 
 class QueryRequest(BaseModel):
     query: str
+    language_code: str = None
 
 class QueryResponse(BaseModel):
     question: str
@@ -51,8 +53,8 @@ async def handle_stt(file: UploadFile = File(...)):
         if not audio_bytes:
             raise HTTPException(status_code=400, detail="Uploaded audio file is empty.")
             
-        transcript = transcribe_audio(audio_bytes, filename=file.filename)
-        return {"transcript": transcript}
+        transcript, language_code = transcribe_audio(audio_bytes, filename=file.filename)
+        return {"transcript": transcript, "language_code": language_code}
     except Exception as e:
         print(f"Error during transcription: {e}")
         raise HTTPException(status_code=500, detail=str(e))
@@ -68,13 +70,16 @@ def handle_query(payload: QueryRequest):
         raise HTTPException(status_code=400, detail="Query text cannot be empty.")
         
     try:
-        # 1. Retrieve top-k context chunks
+        # 1. Detect target language based on query text and STT hints
+        target_language = detect_language_name(query_text, payload.language_code)
+        
+        # 2. Retrieve top-k context chunks
         context_chunks = retrieve_top_k(query_text)
         
-        # 2. Call LLM to generate answer
-        answer = generate_answer(query_text, context_chunks)
+        # 3. Call LLM to generate answer
+        answer = generate_answer(query_text, context_chunks, target_language=target_language)
         
-        # 3. Formulate response
+        # 4. Formulate response
         return QueryResponse(
             question=query_text,
             answer=answer,

@@ -31,5 +31,6 @@ def transcribe_audio(audio_bytes, filename="audio.wav"):
         
     res_json = response.json()
     transcript = res_json.get("transcript", "")
-    print(f"Transcription successful: '{transcript}'")
-    return transcript
+    language_code = res_json.get("language_code", None)
+    print(f"Transcription successful: '{transcript}', language_code: '{language_code}'")
+    return transcript, language_code

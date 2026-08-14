@@ -26,7 +26,7 @@ document.addEventListener("DOMContentLoaded", () => {
     micBtn.addEventListener("dblclick", () => {
         const textQuery = prompt("ध्वनि के स्थान पर पाठ प्रश्न दर्ज करें (Enter text query):");
         if (textQuery && textQuery.trim()) {
-            submitTextQuery(textQuery.trim());
+            submitTextQuery(textQuery.trim(), null);
         }
     });
 
@@ -106,13 +106,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
             const data = await response.json();
             const transcript = data.transcript;
+            const languageCode = data.language_code || null;
 
             if (!transcript || transcript.trim() === "") {
                 statusText.innerText = "कोई आवाज़ नहीं सुनी गई (No voice detected)";
                 return;
             }
 
-            submitTextQuery(transcript);
+            submitTextQuery(transcript, languageCode);
         } catch (err) {
             console.error("STT transcription failed:", err);
             statusText.innerText = "STT विफल (STT Failed)";
@@ -121,7 +122,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    async function submitTextQuery(queryText) {
+    async function submitTextQuery(queryText, languageCode = null) {
         // Show status
         statusText.innerText = "उत्तर खोज रहा हूँ... (Retrieving & Generating...)";
         
@@ -141,7 +142,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 headers: {
                     "Content-Type": "application/json"
                 },
-                body: JSON.stringify({ query: queryText })
+                body: JSON.stringify({ query: queryText, language_code: languageCode })
             });
 
             if (!response.ok) {

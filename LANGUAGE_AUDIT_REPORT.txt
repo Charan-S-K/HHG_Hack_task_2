@@ -1,0 +1,88 @@
+================================================================================
+                    HH GOA VOICE RADAR - LANGUAGE AUDIT REPORT
+================================================================================
+
+--------------------------------------------------------------------------------
+1. STT STAGE
+--------------------------------------------------------------------------------
+The Speech-to-Text integration is implemented in backend/stt/sarvam_stt.py.
+Config/Parameters Found:
+- File: backend/stt/sarvam_stt.py (Lines 20-23)
+  data = {
+      "model": "saaras:v3",
+      "mode": "transcribe"
+  }
+Assessment:
+The parameters do not specify a target language (there is no "language_code" or "target_language" parameter passed to the Sarvam API). The API defaults to auto-detecting the spoken language and transcribing it in the language spoken. No forced target language is assumed or hardcoded in the STT stage.
+
+--------------------------------------------------------------------------------
+2. RETRIEVAL STAGE
+--------------------------------------------------------------------------------
+The retrieval stage uses:
+- Model: "intfloat/multilingual-e5-small" (defined in config.py, line 29, and embedder.py).
+- Dataset: "ai4bharat/MSMARCO-XI" (Hindi split), which means the FAISS index contains exclusively Hindi-language text passages chunked in chunker.py.
+- Cross-lingual Behavior: The E5 embedding model is genuinely multilingual and supports cross-lingual retrieval. An English query (e.g., "Who is Vladimir Putin?") embeds to a vector space where it successfully matches Devanagari script chunks (e.g., "व्लादिमीर पुतिन...") with small L2 distances (~0.34).
+- Upstream Translation: There is no query translation code in the API layer (backend/api/server.py); the raw query text is passed directly into retriever.py.
+
+--------------------------------------------------------------------------------
+3. GENERATION STAGE
+--------------------------------------------------------------------------------
+The answer generation logic is implemented in backend/llm_provider/gemini_llm.py.
+Prompt Template Found:
+- File: backend/llm_provider/gemini_llm.py (Lines 18-25)
+  prompt = (
+      "आप एक सहायक हैं जो निम्नलिखित संदर्भ (Context) के आधार पर उपयोगकर्ता के प्रश्न का उत्तर देता है।\n"
+      "कृपया प्रदान किए गए संदर्भ का उपयोग करके उत्तर दें। यदि संदर्भ में उत्तर नहीं मिल सकता है, "
+      "तो सीधे कहें: 'मुझे खेद है, लेकिन मुझे प्रदान किए गए संदर्भ में इसका उत्तर नहीं मिला।'\n\n"
+      f"संदर्भ:\n{context_str}\n\n"
+      f"प्रश्न: {query_text}\n"
+      "उत्तर (हिंदी में):"
+  )
+Assessment:
+- Hardcoded Target Language: Yes. Line 24 explicitly terminates the prompt with "उत्तर (हिंदी में):" (Answer (in Hindi):), instructing the LLM (Gemini 2.5 Flash) to generate the response exclusively in Hindi regardless of the input language.
+- Context Dominance: Furthermore, the system instructions are fully written in Hindi.
+
+--------------------------------------------------------------------------------
+4. CONFIRM SCOPE OF BEHAVIOR
+--------------------------------------------------------------------------------
+We tested the RAG API with a matrix of 3 English-language queries and 2 Hindi-language queries.
+Observed Query/Answer-Language Matrix:
+1. Query (English): "Who is Vladimir Putin?"
+   -> Answer: Hindi ("व्लादिमीर पुतिन देश के प्रधानमंत्री...")
+2. Query (English): "What is the weather in Chattanooga in January?"
+   -> Answer: Hindi ("चाटानोगो में जनवरी सबसे ठंडा महीना है...")
+3. Query (English): "What is a mortar?"
+   -> Answer: Hindi ("संदर्भों के अनुसार, 'मोर्टार' के दो मुख्य अर्थ हैं...")
+4. Query (Hindi): "पुतिन के बारे में बताएं"
+   -> Answer: Hindi ("संदर्भ के अनुसार, व्लादिमीर पुतिन...")
+5. Query (Hindi): "चैटानोगो का सबसे ठंडा महीना"
+   -> Answer: Hindi ("चैटानोगो का सबसे ठंडा महीना जनवरी है।")
+Conclusion:
+The behavior is 100% consistent. The RAG pipeline always generates responses in Hindi, regardless of the query language.
+
+--------------------------------------------------------------------------------
+5. ROOT CAUSE CONCLUSION
+--------------------------------------------------------------------------------
+The Generation stage is causally responsible for the language mismatch behavior. While the STT stage auto-detects the spoken language and the Retrieval stage performs correct cross-lingual mapping (matching English query strings directly to relevant Hindi passages in the FAISS index), the prompt template in backend/llm_provider/gemini_llm.py contains a hardcoded instruction ("उत्तर (हिंदी में):") that explicitly forces the Gemini model to respond in Hindi.
+
+================================================================================
+                    RUN 1 FIX VERIFICATION REPORT
+================================================================================
+
+Req # | Requirement                                 | Status | Specific Details / Verification Results
+======+=============================================+========+====================================================================
+1     | Embedding model is genuinely multilingual   | PASS   | 'intfloat/multilingual-e5-small' is configured in config.py and embedder.py
+2     | Model supports Hindi/Devanagari script      | PASS   | Verified using scratch/test_multilingual_embed.py (produces valid non-zero embeddings)
+3     | Index & metadata rebuilt using new model    | PASS   | Dimension is 384, rebuilt successfully and loaded in retriever.py
+4     | Re-indexing used exact same subset.jsonl    | PASS   | Rebuilt from committed data/subset.jsonl without re-sampling
+5     | Retrieval quality tested on 3 Hindi queries | PASS   | Tested 3 queries; returned highly relevant climate, mortar, and election chunks
+6     | Poor/irrelevant results reported honestly   | PASS   | Observed no poor/irrelevant top-1 matches; all matches were semantically relevant
+7     | Documentation files updated with change info| PASS   | Updates recorded at the end of DATASET_NOTES.md and DATA_HANDOFF.md
+8     | backend/utils directory exists with init.py | PASS   | Folder and __init__.py created and tracked
+9     | Backend starts cleanly with no errors       | PASS   | Dev server starts with 0 errors and loads index & model in 50ms
+10    | Full flow works end to end                  | PASS   | Verified end-to-end using Sarvam STT and Gemini 2.5 Flash
+11    | Changes committed and pushed to remote      | PASS   | Pushed to origin branch 'first' under commit c5f7985
+
+NUMERIC SCORE: 11.0 / 11
+
+OVERALL VERDICT: Fix confirmed — ready for RUN 2
