@@ -101,7 +101,14 @@ document.addEventListener("DOMContentLoaded", () => {
             });
 
             if (!response.ok) {
-                throw new Error(`STT server returned status ${response.status}`);
+                let errorMsg = `STT failed (Status ${response.status})`;
+                try {
+                    const errData = await response.json();
+                    if (errData && errData.detail) {
+                        errorMsg = errData.detail;
+                    }
+                } catch (_) {}
+                throw new Error(errorMsg);
             }
 
             const data = await response.json();
@@ -117,8 +124,7 @@ document.addEventListener("DOMContentLoaded", () => {
         } catch (err) {
             console.error("STT transcription failed:", err);
             statusText.innerText = "STT विफल (STT Failed)";
-            alert("STT विफल रहा। क्या आपकी .env फ़ाइल में SARVAM_API_KEY सेट है?\n" +
-                  "डबल-क्लिक करके टाइप करें।");
+            alert(`STT विफल रहा: ${err.message}`);
         }
     }
 
@@ -146,7 +152,14 @@ document.addEventListener("DOMContentLoaded", () => {
             });
 
             if (!response.ok) {
-                throw new Error(`RAG query failed with status ${response.status}`);
+                let errorMsg = `RAG query failed (Status ${response.status})`;
+                try {
+                    const errData = await response.json();
+                    if (errData && errData.detail) {
+                        errorMsg = errData.detail;
+                    }
+                } catch (_) {}
+                throw new Error(errorMsg);
             }
 
             const data = await response.json();
@@ -181,8 +194,8 @@ document.addEventListener("DOMContentLoaded", () => {
             statusText.innerText = "सफल! (Completed!)";
         } catch (err) {
             console.error("RAG pipeline failed:", err);
-            answerDisplay.innerText = "त्रुटि: उत्तर उत्पन्न करने में असमर्थ। (Error generating answer.)";
-            alert("RAG पाइपलाइन विफल रही। क्या .env में GEMINI_API_KEY सेट है?");
+            answerDisplay.innerText = `त्रुटि: ${err.message}`;
+            alert(`RAG पाइपलाइन विफल रही: ${err.message}`);
             statusText.innerText = "त्रुटि (Error)";
         }
     }

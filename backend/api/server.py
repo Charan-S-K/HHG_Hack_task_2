@@ -1,4 +1,5 @@
 import os
+import traceback
 from fastapi import FastAPI, UploadFile, File, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
@@ -57,6 +58,7 @@ async def handle_stt(file: UploadFile = File(...)):
         return {"transcript": transcript, "language_code": language_code}
     except Exception as e:
         print(f"Error during transcription: {e}")
+        traceback.print_exc()
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/api/query", response_model=QueryResponse)
@@ -93,6 +95,7 @@ def handle_query(payload: QueryRequest):
         )
     except Exception as e:
         print(f"Error during RAG pipeline: {e}")
+        traceback.print_exc()
         raise HTTPException(status_code=500, detail=str(e))
 
 # Mount frontend static files
