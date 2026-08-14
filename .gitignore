@@ -19,6 +19,7 @@ env/
 .env
 .env.local
 audit_review.txt
+LANGUAGE_AUDIT_REPORT.txt
 
 # IDE configurations
 .vscode/
