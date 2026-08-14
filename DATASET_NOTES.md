@@ -38,3 +38,8 @@ Each record in the dataset is a dictionary representing a question-answering tas
 *   **Behavior**: The RAG generation pipeline is fully language-aware. It detects the language of the incoming query (either by reading the `language_code` returned from the Sarvam STT REST API payload, or by fallback detection using `langdetect` on text input).
 *   **Generation**: The LLM prompt is dynamically adapted to instruct Gemini 2.5 Flash to generate the answer directly in the detected query language (e.g., English or Hindi) while still grounding the answer strictly in the retrieved Hindi context passages.
 *   **Refusal Strings**: Refusal messages are also language-aware (returning in English if the query was in English, and in Hindi if the query was in Hindi).
+
+## Kannada Language Support Verification
+*   **Verification Date**: 2026-08-14
+*   **STT Support**: Confirmed that Sarvam STT `saaras:v3` model transcribes spoken Kannada under language tag `kn-IN`.
+*   **RAG Generation**: The dynamic prompt-generation and refusal-generation pipeline natively maps Kannada text inputs (resolved to `"Kannada"` via `langcodes`) to dynamic, grounded Kannada responses.
