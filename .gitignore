@@ -1,0 +1,31 @@
+# Python cache and build files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+.coverage
+htmlcov/
+dist/
+build/
+*.egg-info/
+
+# Virtual Environment
+venv/
+.venv/
+env/
+
+# Environment configurations and secrets
+.env
+.env.local
+audit_review.txt
+LANGUAGE_AUDIT_REPORT.txt
+
+# IDE configurations
+.vscode/
+.idea/
+.DS_Store
+
+# Local temporary or large downloads (keep subset.jsonl in git, but ignore large Parquet file)
+data/hinval.parquet
+data/hintrain.parquet

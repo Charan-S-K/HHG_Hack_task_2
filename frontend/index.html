@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HH Goa Voice Radar</title>
+    
+    <!-- Google Fonts: Playfair Display (Serif) & JetBrains Mono (Monospace) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app-container">
+        <header>
+            <h1 class="serif-title">HH Goa Voice Radar</h1>
+            <p class="mono-meta">RAG-Powered Voice Assistant • RUN 1 Foundation</p>
+        </header>
+
+        <main>
+            <!-- Microphone Input Section -->
+            <section class="mic-section">
+                <div class="mic-container">
+                    <button id="mic-btn" class="mic-button" aria-label="सक्रिय रिकॉर्डर">
+                        <svg class="mic-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/>
+                            <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/>
+                        </svg>
+                        <div class="pulse-ring"></div>
+                    </button>
+                    <p id="status-text" class="mono-meta">Tap to Speak</p>
+                </div>
+            </section>
+
+            <!-- Results Section (Hidden until transcription or answer is loaded) -->
+            <section id="results-section" class="results-container hidden">
+                <!-- Transcript Card -->
+                <div class="card result-card">
+                    <h2 class="card-heading serif-title">आपका प्रश्न (Query)</h2>
+                    <p id="query-display" class="mono-body text-highlight">...</p>
+                </div>
+
+                <!-- Answer Card -->
+                <div id="answer-card" class="card result-card cream-card hidden">
+                    <h2 class="card-heading serif-title">उत्तर (Answer)</h2>
+                    <p id="answer-display" class="mono-body">उत्पन्न हो रहा है...</p>
+                    
+                    <div class="meta-row">
+                        <span class="badge mono-meta">प्राप्त टुकड़े: <span id="chunk-count">0</span></span>
+                    </div>
+                </div>
+
+                <!-- Retrieved Context Card -->
+                <div id="context-card" class="card result-card cream-card hidden">
+                    <h2 class="card-heading serif-title">प्रासंगिक संदर्भ (Retrieved Context)</h2>
+                    <div id="chunks-list" class="chunks-container">
+                        <!-- Chunks injected here -->
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <p class="mono-meta">&copy; 2026 HH Goa Voice Radar System</p>
+        </footer>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
