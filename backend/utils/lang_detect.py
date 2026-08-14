@@ -23,10 +23,24 @@ def detect_language_name(query_text: str, stt_language_code: str = None) -> str:
         except LangDetectException:
             pass
             
-    # 3. Fallback: check Devanagari Unicode range
+    # 3. Fallback: check script-specific Unicode ranges for Indian languages
     if not raw_code:
-        if any("\u0900" <= char <= "\u097f" for char in query_text):
-            raw_code = "hi"
+        char_checks = [
+            ("\u0900", "\u097f", "hi"),  # Devanagari (Hindi, Sanskrit, Marathi, Nepali)
+            ("\u0980", "\u09ff", "bn"),  # Bengali / Assamese
+            ("\u0a00", "\u0a7f", "pa"),  # Gurmukhi (Punjabi)
+            ("\u0a80", "\u0aff", "gu"),  # Gujarati
+            ("\u0b00", "\u0b7f", "or"),  # Odia (Oriya)
+            ("\u0b80", "\u0bff", "ta"),  # Tamil
+            ("\u0c00", "\u0c7f", "te"),  # Telugu
+            ("\u0c80", "\u0cff", "kn"),  # Kannada
+            ("\u0d00", "\u0d7f", "ml"),  # Malayalam
+            ("\u0600", "\u06ff", "ur"),  # Arabic script (Urdu)
+        ]
+        for start, end, code in char_checks:
+            if any(start <= char <= end for char in query_text):
+                raw_code = code
+                break
 
     # 4. If no code was resolved, default to "en"
     if not raw_code:
