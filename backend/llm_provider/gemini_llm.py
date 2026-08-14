@@ -14,7 +14,7 @@ def generate_answer(query_text, context_chunks, target_language="Hindi"):
     if not GEMINI_API_KEY:
         raise ValueError("GEMINI_API_KEY is not set. Please add it to your .env file.")
         
-    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={GEMINI_API_KEY}"
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-lite-latest:generateContent?key={GEMINI_API_KEY}"
     
     # Construct context string
     context_str = "\n\n".join([f"--- संदर्भ {i+1} ---\n{chunk['text']}" for i, chunk in enumerate(context_chunks)])
