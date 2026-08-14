@@ -12,6 +12,11 @@ from backend.retrieval.retriever import retrieve_top_k
 from backend.llm_provider.gemini_llm import generate_answer
 from backend.utils.lang_detect import detect_language_name
 
+SUPPORTED_STT_LANGUAGES = {
+    "en", "as", "bn", "gu", "hi", "kn", "ml", "mr", "ne", "or", "pa", "sa", "ta", "te", "ur",
+    "brx", "doi", "ks", "kok", "mai", "mni", "sat", "sd"
+}
+
 app = FastAPI(title="HH Goa Voice Radar API")
 
 # Configure CORS
@@ -55,7 +60,16 @@ async def handle_stt(file: UploadFile = File(...)):
             raise HTTPException(status_code=400, detail="Uploaded audio file is empty.")
             
         transcript, language_code = transcribe_audio(audio_bytes, filename=file.filename)
+        if language_code:
+            code = language_code.split("-")[0].lower()
+            if code not in SUPPORTED_STT_LANGUAGES:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"Language code '{language_code}' is not supported for voice input."
+                )
         return {"transcript": transcript, "language_code": language_code}
+    except HTTPException as he:
+        raise he
     except Exception as e:
         print(f"Error during transcription: {e}")
         traceback.print_exc()
@@ -93,6 +107,8 @@ def handle_query(payload: QueryRequest):
                 "is_selected": chunk["is_selected"]
             } for chunk in context_chunks]
         )
+    except HTTPException as he:
+        raise he
     except Exception as e:
         print(f"Error during RAG pipeline: {e}")
         traceback.print_exc()
