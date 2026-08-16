@@ -1,22 +1,38 @@
-# HH Goa Voice Radar (RAG Voice Assistant)
+# HH Goa Voice Radar — RUN 2
 
-HH Goa Voice Radar is a voice-enabled RAG (Retrieval-Augmented Generation) system built using local embedding search (FAISS + sentence-transformers) and API-based generation (Gemini API) and transcription (Sarvam STT). It targets queries in Hindi using the `ai4bharat/MSMARCO-XI` dataset.
+A multilingual, voice-enabled RAG (Retrieval-Augmented Generation) system built on FAISS + sentence-transformers (local) + Gemini API (generation) + Sarvam AI (STT). Supports queries in any Indian language and returns grounded answers in the same language the question was asked.
 
 ---
 
-## Technical Stack & Environment
+## What's New in RUN 2
 
-This repository has pinned the following runtime versions for reproducibility:
-*   **Python**: `3.13.2` (Specified in [runtime.txt](file:///Users/charantejsk/Documents/HHG/HHG_TASK_2/runtime.txt))
-*   **Node.js**: `24.14.0` (Specified in [.nvmrc](file:///Users/charantejsk/Documents/HHG/HHG_TASK_2/.nvmrc))
-*   **Key Python Dependencies**:
-    *   `fastapi` (API Web Server)
-    *   `faiss-cpu` (Vector Indexing & L2 Similarity Search)
-    *   `sentence-transformers` (Local embeddings using `all-MiniLM-L6-v2`)
-    *   `datasets` (Loading parquet data structures)
-    *   `pandas`, `pyarrow` (Parquet parsing)
+| Feature | Detail |
+|---------|--------|
+| **Multi-strategy chunking** | 4 strategies: `fixed` (RUN 1), `sentence`, `metadata`, `hybrid` (default) |
+| **Per-strategy FAISS indexes** | Each strategy has its own persisted index under `data/faiss_index/<strategy>/` |
+| **Retrieval refinement** | Top-k tuning, metadata filtering, dedup, context compression |
+| **Guardrails** | Off-topic, unsafe input, grounding validation, insufficient context — all in query language |
+| **Pipeline harness** | 9 explicit stages, per-stage timing, retries, graceful error recovery |
+| **Real benchmark** | 100 queries from committed subset; P50/P70/P100/avg/min/max; STT excluded explicitly |
+| **HOLOGRAM mode** | Animated SVG orb with 6 distinct visual states |
+| **TAP TO SPEAK mode** | Mic + live transcript + answer + expandable Sources accordion |
+| **Performance dashboard** | Live benchmark trigger + real latency table in UI |
+| **Prompt injection resistance** | DATA/INSTRUCTIONS separation in LLM prompt template |
+| **Structured API response** | `refused`, `reason`, `strategy`, `latencies`, `guardrail_decisions`, `context` |
 
-Exact pip versions are pinned in [requirements.txt](file:///Users/charantejsk/Documents/HHG/HHG_TASK_2/requirements.txt).
+---
+
+## Technical Stack
+
+| Component | Technology |
+|-----------|-----------|
+| API Server | FastAPI + uvicorn |
+| Vector Index | FAISS IndexFlatL2 (384-dim) |
+| Embedding Model | `intfloat/multilingual-e5-small` |
+| LLM | Google Gemini 2.0 Flash Lite (REST) |
+| STT | Sarvam AI `saaras:v3` (REST) |
+| Language Detection | `langdetect` + Unicode script ranges + `langcodes` |
+| Python | 3.11+ |
 
 ---
 
@@ -25,92 +41,131 @@ Exact pip versions are pinned in [requirements.txt](file:///Users/charantejsk/Do
 ```
 /
 ├── data/
-│   ├── subset.jsonl                 # Persistent dataset subset (100 records)
-│   ├── faiss_index/                 # Persisted FAISS index
-│   └── metadata.json                # Chunk metadata mapping
+│   ├── subset.jsonl                      # Committed 100-record subset (RUN 1, seed=42)
+│   ├── faiss_index/
+│   │   ├── fixed/                         # Fixed-size chunking index (RUN 1 migrated)
+│   │   ├── sentence/                      # Sentence-boundary index
+│   │   ├── metadata/                      # Metadata-aware index
+│   │   └── hybrid/                        # Hybrid index (production default)
+│   └── benchmark_results.json             # Live benchmark output (gitignored)
 ├── backend/
-│   ├── config.py                    # Config loading (from env)
-│   ├── dataset_ingestion/
-│   │   └── loader.py                # Loader for JSONL subset
-│   ├── chunking/
-│   │   └── chunker.py               # Text cleaning and fixed-size overlap chunking
-│   ├── embeddings/
-│   │   └── embedder.py              # Local sentence-transformers loader
-│   ├── vector_store/
-│   │   └── indexer.py               # FAISS index builder/loader
-│   ├── retrieval/
-│   │   └── retriever.py             # Top-k vector retriever
-│   ├── stt/
-│   │   └── sarvam_stt.py            # Sarvam AI STT client (REST)
-│   ├── llm_provider/
-│   │   └── gemini_llm.py            # Gemini RAG answer generator
-│   └── api/
-│       └── server.py                # FastAPI server (STT, Retrieve, and RAG endpoints)
+│   ├── config.py                          # All settings + env loading
+│   ├── dataset_ingestion/loader.py
+│   ├── chunking/chunker.py                # 4 strategies + dispatcher
+│   ├── embeddings/embedder.py             # multilingual-e5-small singleton
+│   ├── vector_store/indexer.py            # Multi-strategy index builder
+│   ├── retrieval/retriever.py             # Retrieve + dedup + compress
+│   ├── guardrails/guardrails.py           # 4 guardrail checks + dynamic refusals
+│   ├── pipeline/pipeline.py               # 9-stage orchestrated harness
+│   ├── benchmark/harness.py               # Real latency benchmark
+│   ├── stt/sarvam_stt.py
+│   ├── llm_provider/gemini_llm.py         # Injection-resistant prompt template
+│   ├── utils/lang_detect.py
+│   └── api/server.py                      # FastAPI endpoints
 ├── frontend/
-│   ├── index.html                   # HTML structure
-│   ├── style.css                    # Styling for the UI (Dark green, cream, pink)
-│   └── app.js                       # Audio recording and API handling
-├── .env.example
-├── .gitignore
+│   ├── index.html                         # HOLOGRAM + TAP TO SPEAK + dashboard
+│   ├── style.css
+│   └── app.js
+├── DATA_HANDOFF.md                        # Dataset + index reproducibility
+├── RETRIEVAL_NOTES.md                     # Strategy comparison + benchmark results
 ├── requirements.txt
-├── runtime.txt
-└── .nvmrc
+└── .env.example
 ```
 
 ---
 
-## Setup & Running Instructions
+## Setup & Running
 
-### 1. Set Up Virtual Environment
-
-Create and activate a virtual environment, then install requirements:
+### 1. Create virtual environment
 
 ```bash
-python3 -m venv venv
+python -m venv venv
+# Windows:
+venv\Scripts\activate
+# macOS/Linux:
 source venv/bin/activate
+```
+
+### 2. Install dependencies
+
+```bash
 pip install -r requirements.txt
 ```
 
-### 2. Configure Environment Secrets
-
-Create a `.env` file in the root directory:
+### 3. Configure environment
 
 ```bash
 cp .env.example .env
+# Edit .env with your SARVAM_API_KEY and GEMINI_API_KEY
 ```
 
-Open `.env` and fill in your API keys:
-*   `SARVAM_API_KEY`: Get from the [Sarvam AI Dashboard](https://dashboard.sarvam.ai/).
-*   `GEMINI_API_KEY`: Get a free key from [Google AI Studio](https://aistudio.google.com/).
-
-### 3. Build/Verify the Vector Index
-
-The FAISS index has already been built and committed to the repository at [data/faiss_index/index.faiss](file:///Users/charantejsk/Documents/HHG/HHG_TASK_2/data/faiss_index/index.faiss). You can optionally rebuild it by running:
+### 4. Build indexes
 
 ```bash
-python3 -m backend.vector_store.indexer
+# Build all 4 strategy indexes (required for first run):
+python -m backend.vector_store.indexer --strategy all
+
+# Or build just the production default:
+python -m backend.vector_store.indexer --strategy hybrid
 ```
 
-### 4. Run the Backend API & Frontend Server
-
-Start the uvicorn development server:
+### 5. Start the server
 
 ```bash
 uvicorn backend.api.server:app --reload --port 8000
 ```
 
-The application will be accessible at `http://127.0.0.1:8000`.
+Open `http://127.0.0.1:8000` in your browser.
 
 ---
 
-## Verification & Testing Fallback
+## API Endpoints
 
-If you are running the application in a headless remote server or environment without microphone support:
-*   **Double-click** the microphone button on the frontend UI to prompt a text input dialog, allowing you to submit text queries directly to the RAG retriever and generator.
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/api/status` | Health check |
+| POST | `/api/stt` | Audio → transcript (Sarvam AI) |
+| POST | `/api/query` | Full RAG pipeline (text query) |
+| POST | `/api/benchmark/run` | Trigger live benchmark |
+| GET | `/api/benchmark/results` | Get benchmark results |
+| POST | `/api/index/build` | Build a strategy index |
+
+### Query Response Structure
+
+```json
+{
+  "request_id": "abc12345",
+  "question": "...",
+  "answer": "...",
+  "refused": false,
+  "refusal_reason": "",
+  "strategy": "hybrid",
+  "retrieved_chunk_count": 5,
+  "latencies": { "embedding_retrieval": 0.08, "generation": 1.2, ... },
+  "total_latency": 1.42,
+  "excl_stt_latency": 1.42,
+  "guardrail_decisions": { "off_topic": { "passed": true }, ... },
+  "context": [ { "text": "...", "relevance_score": 0.85, "strategy": "hybrid", ... } ]
+}
+```
+
+---
+
+## Guardrails
+
+| Guardrail | Trigger | Response |
+|-----------|---------|----------|
+| Unsafe input | Regex/injection patterns | Dynamic refusal in query language |
+| Off-topic | L2 distance > 1.5 | Dynamic refusal in query language |
+| Insufficient context | All distances > 2.0 | Dynamic refusal in query language |
+| Ungrounded answer | Token overlap < 10% | Dynamic refusal in query language |
+
+All refusals are generated by Gemini in the detected query language. No hardcoded English/Hindi strings.
 
 ---
 
 ## Documentation
 
-*   [DATASET_NOTES.md](file:///Users/charantejsk/Documents/HHG/HHG_TASK_2/DATASET_NOTES.md): Dataset schema, languages, and sampling rationale.
-*   [DATA_HANDOFF.md](file:///Users/charantejsk/Documents/HHG/HHG_TASK_2/DATA_HANDOFF.md): Technical parameters for dataset reproduction (seed, split, revision).
+- [DATA_HANDOFF.md](DATA_HANDOFF.md) — Dataset + index reproducibility
+- [RETRIEVAL_NOTES.md](RETRIEVAL_NOTES.md) — Strategy comparison + benchmark results
+- [DATASET_NOTES.md](DATASET_NOTES.md) — Dataset schema and notes

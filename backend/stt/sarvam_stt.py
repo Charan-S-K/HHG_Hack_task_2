@@ -1,36 +1,55 @@
-import requests
-from backend.config import SARVAM_API_KEY
+"""
+Sarvam AI STT client — RUN 2.
+Updated: timeout parameter support, real exception propagation.
+"""
 
-def transcribe_audio(audio_bytes, filename="audio.wav"):
+import os
+import requests
+import logging
+from backend.config import STT_TIMEOUT
+
+logger = logging.getLogger(__name__)
+
+
+def transcribe_audio(audio_bytes: bytes, filename: str = "audio.wav", timeout: int = STT_TIMEOUT):
     """
-    Sends binary audio data to Sarvam STT REST API for transcription/translation.
+    Sends binary audio data to Sarvam STT REST API for transcription.
+
+    Args:
+        audio_bytes: Raw audio bytes.
+        filename:    Filename hint (controls MIME type inference).
+        timeout:     HTTP request timeout in seconds.
+
+    Returns:
+        (transcript: str, language_code: str | None)
+
+    Raises real exceptions — never masks them behind a generic message.
     """
-    if not SARVAM_API_KEY:
-        raise ValueError("SARVAM_API_KEY is not set. Please add it to your .env file.")
-        
+    api_key = os.getenv("SARVAM_API_KEY")
+    if not api_key:
+        raise ValueError(
+            "SARVAM_API_KEY is not set. Please add it to your .env file."
+        )
+
     url = "https://api.sarvam.ai/speech-to-text"
-    headers = {
-        "api-subscription-key": SARVAM_API_KEY
-    }
-    
-    # Send request with multipart/form-data
-    files = {
-        "file": (filename, audio_bytes, "audio/wav")
-    }
-    data = {
-        "model": "saaras:v3",
-        "mode": "transcribe"  # Default transcription mode
-    }
-    
-    print(f"Sending audio request to Sarvam STT... (file size: {len(audio_bytes)} bytes)")
-    response = requests.post(url, headers=headers, files=files, data=data)
-    
+    headers = {"api-subscription-key": api_key.strip()}
+
+    files = {"file": (filename, audio_bytes, "audio/wav")}
+    data  = {"model": "saaras:v3", "mode": "transcribe"}
+
+    logger.info("Sarvam STT request: %d bytes, file=%s", len(audio_bytes), filename)
+
+    response = requests.post(url, headers=headers, files=files, data=data, timeout=timeout)
+
     if response.status_code != 200:
-        print(f"Sarvam STT failed (code {response.status_code}): {response.text}")
+        logger.error(
+            "Sarvam STT HTTP %d: %s", response.status_code, response.text[:300]
+        )
         response.raise_for_status()
-        
+
     res_json = response.json()
-    transcript = res_json.get("transcript", "")
+    transcript    = res_json.get("transcript", "")
     language_code = res_json.get("language_code", None)
-    print(f"Transcription successful: '{transcript}', language_code: '{language_code}'")
+
+    logger.info("Sarvam STT result: transcript='%.60s', lang=%s", transcript, language_code)
     return transcript, language_code
