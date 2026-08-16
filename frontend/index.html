@@ -1,70 +1,231 @@
 <!DOCTYPE html>
-<html lang="hi">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HH Goa Voice Radar</title>
-    
-    <!-- Google Fonts: Playfair Display (Serif) & JetBrains Mono (Monospace) -->
+    <title>HH Goa Voice Radar — RAG Voice Assistant</title>
+    <meta name="description" content="HH Goa Voice Radar: a multilingual RAG-powered voice assistant for hotel information. Ask in any language and get grounded answers.">
+
+    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap" rel="stylesheet">
-    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;1,500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="app-container">
-        <header>
-            <h1 class="serif-title">HH Goa Voice Radar</h1>
-            <p class="mono-meta">RAG-Powered Voice Assistant • RUN 1 Foundation</p>
+    <div class="app-shell">
+
+        <!-- ── Header ───────────────────────────────────── -->
+        <header class="app-header">
+            <div class="header-inner">
+                <div class="brand">
+                    <span class="brand-dot"></span>
+                    <h1 class="brand-name">HH Goa Voice Radar</h1>
+                </div>
+                <p class="brand-sub">Multilingual RAG Assistant · RUN 2</p>
+            </div>
         </header>
 
-        <main>
-            <!-- Microphone Input Section -->
-            <section class="mic-section">
-                <div class="mic-container">
-                    <button id="mic-btn" class="mic-button" aria-label="सक्रिय रिकॉर्डर">
-                        <svg class="mic-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/>
-                            <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/>
-                        </svg>
-                        <div class="pulse-ring"></div>
-                    </button>
-                    <p id="status-text" class="mono-meta">Tap to Speak</p>
+        <!-- ── Mode Switcher ─────────────────────────────── -->
+        <div class="mode-switcher-wrap">
+            <div class="mode-switcher" role="tablist" aria-label="Voice mode selection">
+                <button id="mode-hologram" class="mode-tab active" role="tab" aria-selected="true"
+                    aria-controls="hologram-panel" data-mode="hologram">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/>
+                    </svg>
+                    Hologram
+                </button>
+                <button id="mode-tap" class="mode-tab" role="tab" aria-selected="false"
+                    aria-controls="tap-panel" data-mode="tap">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+                        <path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v4M8 23h8"/>
+                    </svg>
+                    Tap to Speak
+                </button>
+            </div>
+
+            <!-- Strategy selector (shared) -->
+            <div class="strategy-selector">
+                <label for="strategy-select" class="strategy-label">Strategy</label>
+                <select id="strategy-select" class="strategy-select">
+                    <option value="hybrid" selected>Hybrid (default)</option>
+                    <option value="fixed">Fixed-size</option>
+                    <option value="sentence">Sentence</option>
+                    <option value="metadata">Metadata-aware</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- ── Main panels ───────────────────────────────── -->
+        <main class="main-content">
+
+            <!-- ═══════════════ HOLOGRAM MODE ═══════════════ -->
+            <section id="hologram-panel" class="mode-panel active" role="tabpanel" aria-labelledby="mode-hologram">
+                <div class="hologram-layout">
+
+                    <!-- Central animated orb -->
+                    <div class="hologram-center">
+                        <div class="hologram-rings-wrap" id="hologram-orb" aria-live="polite">
+                            <div class="h-ring h-ring-1"></div>
+                            <div class="h-ring h-ring-2"></div>
+                            <div class="h-ring h-ring-3"></div>
+                            <div class="h-core">
+                                <svg class="h-icon" id="hologram-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                    <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+                                    <path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v4M8 23h8"/>
+                                </svg>
+                            </div>
+                            <!-- Waveform bars (listening state) -->
+                            <div class="h-waveform" id="hologram-waveform">
+                                <span></span><span></span><span></span><span></span><span></span>
+                                <span></span><span></span><span></span><span></span><span></span>
+                            </div>
+                        </div>
+
+                        <p class="hologram-state-label" id="hologram-status">Ready to listen</p>
+
+                        <button id="hologram-mic-btn" class="hologram-action-btn" aria-label="Start listening">
+                            Tap to Speak
+                        </button>
+                        <button id="hologram-text-btn" class="hologram-text-btn" title="Type a query instead">
+                            Type a query
+                        </button>
+                    </div>
+
+                    <!-- Hologram answer display -->
+                    <div id="hologram-answer-wrap" class="hologram-answer hidden">
+                        <div class="answer-badge" id="hologram-refused-badge">Refusal</div>
+                        <p class="hologram-answer-text" id="hologram-answer-text"></p>
+                        <div class="hologram-meta-row">
+                            <span class="meta-chip" id="hologram-strategy-chip"></span>
+                            <span class="meta-chip" id="hologram-latency-chip"></span>
+                            <span class="meta-chip" id="hologram-chunks-chip"></span>
+                        </div>
+                    </div>
+
                 </div>
             </section>
 
-            <!-- Results Section (Hidden until transcription or answer is loaded) -->
-            <section id="results-section" class="results-container hidden">
-                <!-- Transcript Card -->
-                <div class="card result-card">
-                    <h2 class="card-heading serif-title">आपका प्रश्न (Query)</h2>
-                    <p id="query-display" class="mono-body text-highlight">...</p>
-                </div>
+            <!-- ═══════════════ TAP TO SPEAK MODE ═══════════ -->
+            <section id="tap-panel" class="mode-panel" role="tabpanel" aria-labelledby="mode-tap">
+                <div class="tap-layout">
 
-                <!-- Answer Card -->
-                <div id="answer-card" class="card result-card cream-card hidden">
-                    <h2 class="card-heading serif-title">उत्तर (Answer)</h2>
-                    <p id="answer-display" class="mono-body">उत्पन्न हो रहा है...</p>
-                    
-                    <div class="meta-row">
-                        <span class="badge mono-meta">प्राप्त टुकड़े: <span id="chunk-count">0</span></span>
-                    </div>
-                </div>
+                    <!-- Recording panel -->
+                    <div class="tap-record-area">
+                        <button id="tap-mic-btn" class="tap-mic-button" aria-label="Start recording">
+                            <svg class="tap-mic-icon" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/>
+                                <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/>
+                            </svg>
+                            <div class="tap-pulse"></div>
+                        </button>
+                        <p class="tap-label" id="tap-label">Tap to Speak</p>
 
-                <!-- Retrieved Context Card -->
-                <div id="context-card" class="card result-card cream-card hidden">
-                    <h2 class="card-heading serif-title">प्रासंगिक संदर्भ (Retrieved Context)</h2>
-                    <div id="chunks-list" class="chunks-container">
-                        <!-- Chunks injected here -->
+                        <!-- Live transcription display -->
+                        <div id="tap-transcript-live" class="tap-transcript-live hidden">
+                            <div class="transcript-dot"></div>
+                            <span id="tap-transcript-text">Listening…</span>
+                        </div>
+
+                        <button id="tap-cancel-btn" class="tap-cancel-btn hidden">Cancel</button>
                     </div>
+
+                    <!-- Results area -->
+                    <div id="tap-results" class="tap-results hidden">
+
+                        <!-- Question -->
+                        <div class="result-block">
+                            <p class="result-label">Your question</p>
+                            <p class="result-question" id="tap-question"></p>
+                        </div>
+
+                        <!-- Answer (with refusal badge) -->
+                        <div class="result-block answer-block" id="tap-answer-block">
+                            <div class="answer-block-header">
+                                <p class="result-label">Answer</p>
+                                <span class="refused-pill hidden" id="tap-refused-pill">Refused</span>
+                            </div>
+                            <p class="result-answer" id="tap-answer"></p>
+                            <div class="answer-meta" id="tap-answer-meta"></div>
+                        </div>
+
+                        <!-- Sources accordion -->
+                        <details class="sources-accordion" id="tap-sources-accordion">
+                            <summary class="sources-summary">
+                                <span>Show sources</span>
+                                <span class="sources-count" id="tap-sources-count"></span>
+                            </summary>
+                            <div class="sources-body" id="tap-sources-body"></div>
+                        </details>
+
+                    </div>
+
+                    <!-- Text input fallback -->
+                    <div class="tap-text-fallback">
+                        <input type="text" id="tap-text-input" class="tap-text-input"
+                            placeholder="Or type your query here…" autocomplete="off">
+                        <button id="tap-text-submit" class="tap-text-submit">Ask</button>
+                    </div>
+
                 </div>
             </section>
+
         </main>
 
-        <footer>
-            <p class="mono-meta">&copy; 2026 HH Goa Voice Radar System</p>
+        <!-- ── Performance Dashboard ─────────────────────── -->
+        <section class="perf-dashboard" id="perf-dashboard">
+            <div class="perf-header">
+                <h2 class="perf-title">Performance Dashboard</h2>
+                <div class="perf-actions">
+                    <button id="run-benchmark-btn" class="perf-btn primary">Run Benchmark</button>
+                    <button id="test-refusal-btn" class="perf-btn secondary">Test Refusal</button>
+                </div>
+            </div>
+
+            <!-- Benchmark status / running indicator -->
+            <div id="benchmark-status-bar" class="benchmark-status-bar hidden">
+                <div class="bench-spinner"></div>
+                <span id="benchmark-status-text">Benchmark running…</span>
+                <span id="benchmark-progress-text" class="bench-progress"></span>
+            </div>
+
+            <!-- Stats table -->
+            <div id="perf-stats-wrap" class="perf-stats-wrap">
+                <p class="perf-empty" id="perf-empty-msg">No benchmark data yet. Run the benchmark to see real latency numbers.</p>
+
+                <table class="perf-table hidden" id="perf-table">
+                    <thead>
+                        <tr>
+                            <th>Stage</th>
+                            <th>P50</th>
+                            <th>P70</th>
+                            <th>P100</th>
+                            <th>Avg</th>
+                            <th>Min</th>
+                            <th>Max</th>
+                            <th>N</th>
+                        </tr>
+                    </thead>
+                    <tbody id="perf-table-body"></tbody>
+                </table>
+
+                <!-- Notes -->
+                <div class="perf-notes hidden" id="perf-notes">
+                    <p id="perf-meets-target"></p>
+                    <p id="perf-bottleneck"></p>
+                    <p class="perf-stt-note" id="perf-stt-note"></p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ── Footer ────────────────────────────────────── -->
+        <footer class="app-footer">
+            <p>© 2026 HH Goa Voice Radar · RUN 2 · <span id="footer-strategy"></span></p>
         </footer>
+
     </div>
 
     <script src="app.js"></script>

@@ -29,3 +29,14 @@ LANGUAGE_AUDIT_REPORT.txt
 # Local temporary or large downloads (keep subset.jsonl in git, but ignore large Parquet file)
 data/hinval.parquet
 data/hintrain.parquet
+
+# Benchmark results (regenerated locally, not committed)
+data/benchmark_results.json
+
+# RUN 2 strategy indexes (too large for Git direct commit; regenerate with indexer)
+# data/faiss_index/sentence/
+# data/faiss_index/metadata/
+# data/faiss_index/hybrid/
+# Uncomment above lines if indexes exceed Git size limits.
+# The fixed/ index is committed. All others: regenerate with:
+#   python -m backend.vector_store.indexer --strategy all
