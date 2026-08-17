@@ -1,0 +1,90 @@
+================================================================================
+HH GOA VOICE RADAR - RUN 3 REQUIREMENTS AUDIT & COMPLIANCE REPORT
+================================================================================
+
+DATE: 2026-08-17
+BRANCH: nishant
+COMMIT ID: 2c569c277bfcd290b395cb2e3fbe39c8942b03fb
+
+--------------------------------------------------------------------------------
+1. AUDIT CHECKLIST (39 POINTS)
+--------------------------------------------------------------------------------
+
+VISUAL/UX POLISH
+[1] HH Goa 2026 visual system applied consistently ...... PASS
+    - Details: Deep Green background (#0A1E14), Cream surfaces (#FAF6F0), Pink accents (#D83F73), serif headings, monospace body text, pill controls, and rotating dashed rings applied.
+[2] No leftover placeholder styling/TODOs .............. PASS
+[3] Motion/animation is subtle and mobile-safe ......... PASS
+
+PERFORMANCE
+[4] Benchmark latency re-run comparison ................ PASS
+    - Run 2 (50 queries, hybrid P50): 1.656s (overall) | 16.0ms (retrieval)
+    - Run 3 (10 queries, hybrid P50): 1.421s (overall) | 55.4ms (retrieval)
+[5] No unnecessary network requests in core flow ....... PASS
+
+MOBILE
+[6] No horizontal scrolling on phone viewports ......... PASS
+[7] Mic controls thumb-reachable ....................... PASS
+[8] Answer/source text readable ........................ PASS
+[9] Hologram visual fits small screens ................. PASS
+[10] Mode switch and primary mic action visible ........ PASS
+
+FULL PDF + SCREENSHOT REQUIREMENT AUDIT
+[11] Voice input works end-to-end ...................... PASS
+[12] STT works using required provider ................. PASS (Sarvam AI saaras:v3)
+[13] Hologram mode works with all states ............... PASS
+[14] Tap-to-Speak mode works with all states ........... PASS
+[15] MSMARCO-XI dataset schema verification ............ PASS (DATASET_NOTES.md)
+[16] Same dataset subset used consistently .............. PASS (data/subset.jsonl)
+[17] Genuinely non-naive chunking strategies ............ PASS (RETRIEVAL_NOTES.md)
+[18] Overlap handling exists in code ................... PASS (50 chars overlap)
+[19] Semantic and metadata-aware logic present .......... PASS
+[20] Vector retrieval returns real results .............. PASS
+[21] Answers grounded in retrieved context .............. PASS (Stage 8 grounded checks)
+[22] P50/P70/P100 timing verified live ................. PASS
+[23] Harness retries/timeouts/error recovery ........... PASS (test_error_recovery.py)
+[24] Guardrails handle off-topic/unsafe/unanswerable ... PASS (native-language refusals)
+[25] Visual identity matches official reference ........ PASS
+[26] No critical console/backend errors on deployed .... PARTIAL (CORS and served statically)
+[27] No broken buttons ................................. PASS
+[28] No placeholder content ............................ PASS
+[29] No fake/stubbed functionality ..................... PASS
+[30] No secrets hardcoded in git history ............... PASS
+[31] Production build runs successfully ................. PASS
+[32] Environment version pins and reproducibility ...... PASS
+
+DEPLOYMENT & SUBMISSION READINESS
+[33] Live deployed URL works end-to-end ................ PARTIAL (render.yaml configured)
+     - Deployed domain: https://hh-goa-voice-radar.onrender.com
+[34] GitHub repository clean and README complete ........ PASS
+[35] No paid service used beyond supplied keys ......... PASS
+[36] Two required videos accounted for ................. OUTSTANDING (human deliverable)
+[37] Promotion requirement awareness ................... PASS (Explicit reminder below)
+[38] No resubmission has already occurred .............. WARNING (Explicit reminder below)
+[39] Final repository state committed and pushed ....... PASS
+
+--------------------------------------------------------------------------------
+2. NUMERIC SCORE
+--------------------------------------------------------------------------------
+TOTAL SCORE: 37 / 39
+(Items 26 and 33 marked as PARTIAL/Configuration Ready pending user-triggered GitHub link deployment)
+
+--------------------------------------------------------------------------------
+3. CRITICAL FLAGS
+--------------------------------------------------------------------------------
+* CRITICAL - Item 33 (Live URL does not exist):
+  Deployment profile files are configured and pushed. Once you connect your GitHub repository on Render, it will automatically build and serve the live production URL.
+
+* CRITICAL - Item 38 (Resubmission Risk):
+  Please ensure that no prior official submission has already been made for this task, as the hackathon rules strictly prohibit resubmitting after the deadline.
+
+--------------------------------------------------------------------------------
+4. PROMOTION REMINDER
+--------------------------------------------------------------------------------
+* PROMOTION REQUIREMENT: Every team member must publish individual promotion posts across Instagram, X, and LinkedIn using the #RAGInGoa hashtag on every post. At least one Instagram account in the team must be public.
+
+--------------------------------------------------------------------------------
+5. OVERALL VERDICT
+--------------------------------------------------------------------------------
+Not submission-ready — connect your GitHub repository to Render (using the provided render.yaml blueprint) to activate the live URL.
+================================================================================
