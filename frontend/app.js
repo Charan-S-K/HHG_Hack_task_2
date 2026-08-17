@@ -1,5 +1,5 @@
 /**
- * HH Goa Voice Radar — RUN 2 Frontend
+ * HH Goa Voice Radar — RUN 3 Frontend
  *
  * Features:
  *   - Mode switcher (HOLOGRAM / TAP TO SPEAK) with state preservation
