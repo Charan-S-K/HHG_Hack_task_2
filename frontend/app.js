@@ -31,6 +31,8 @@ const state = {
     benchmarkRunning: false,
     benchmarkPollInterval: null,
     strategySelected: () => document.getElementById('strategy-select').value,
+    wakeWordEnabled: true,
+    wakeWordRecognition: null,
 };
 
 // ═══════════════════════════════════════════════════════════
@@ -50,6 +52,7 @@ const HOLOGRAM_STATES = {
     answering:  { label: 'Answer ready',           cls: 'hologram-orb-answering',  btnText: 'Ask again' },
     refusal:    { label: 'No answer available',    cls: 'hologram-orb-refusal',    btnText: 'Ask again' },
     error:      { label: 'Something went wrong',   cls: 'hologram-orb-error',      btnText: 'Try again' },
+    awakened:   { label: 'Listening for query…',   cls: 'hologram-orb-awakened',   btnText: null },
 };
 
 const ALL_ORB_CLASSES = Object.values(HOLOGRAM_STATES).map(s => s.cls).filter(Boolean);
@@ -73,6 +76,10 @@ function setHologramState(stateName) {
         actionBtn.style.display = '';
     } else {
         actionBtn.style.display = 'none';
+    }
+
+    if (stateName === 'idle' && state.mode === 'hologram') {
+        startWakeWordListener();
     }
 }
 
@@ -99,6 +106,12 @@ function switchMode(targetMode) {
     document.querySelectorAll('.mode-panel').forEach(panel => {
         panel.classList.toggle('active', panel.id === `${targetMode}-panel`);
     });
+
+    if (targetMode === 'hologram') {
+        startWakeWordListener();
+    } else {
+        stopWakeWordListener();
+    }
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -134,6 +147,7 @@ async function startRecording(mode) {
 
     if (mode === 'hologram') {
         setHologramState('listening');
+        startAmplitudeAnalyzer(state.stream);
     } else {
         $('tap-mic-btn').classList.add('recording');
         $('tap-label').textContent = 'Recording… tap to stop';
@@ -169,6 +183,7 @@ function cancelRecording() {
 }
 
 function releaseMic() {
+    stopAmplitudeAnalyzer();
     if (state.stream) {
         state.stream.getTracks().forEach(t => t.stop());
         state.stream = null;
@@ -679,8 +694,25 @@ document.addEventListener('DOMContentLoaded', () => {
     // ── Initial load: fetch any existing benchmark data ──
     loadBenchmarkResults();
 
+    // ── Wake Word toggle wiring ───────────────────────
+    const wakeToggle = $('hologram-wake-toggle');
+    if (wakeToggle) {
+        wakeToggle.addEventListener('click', () => {
+            state.wakeWordEnabled = !state.wakeWordEnabled;
+            wakeToggle.classList.toggle('active', state.wakeWordEnabled);
+            if (state.wakeWordEnabled) {
+                wakeToggle.innerHTML = '<span class="wake-status-dot"></span> Wake Word: "Hey Hacker"';
+                startWakeWordListener();
+            } else {
+                wakeToggle.innerHTML = '<span class="wake-status-dot"></span> Wake Word: Muted';
+                stopWakeWordListener();
+            }
+        });
+    }
+
     // Initial hologram state
     setHologramState('idle');
+    initWakeWordListener();
 });
 
 // Helper to read current orb state
@@ -691,3 +723,159 @@ function getCurrentOrbState() {
     }
     return 'idle';
 }
+
+// ═══════════════════════════════════════════════════════════
+// Wake Word Activation Logic
+// ═══════════════════════════════════════════════════════════
+
+function initWakeWordListener() {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+        console.warn('Web Speech API (SpeechRecognition) is not supported in this browser.');
+        const toggle = $('hologram-wake-toggle');
+        if (toggle) {
+            toggle.classList.remove('active');
+            toggle.disabled = true;
+            toggle.title = 'Speech recognition not supported in this browser';
+            toggle.innerHTML = '<span class="wake-status-dot"></span> Wake Word: Unsupported';
+        }
+        state.wakeWordEnabled = false;
+        return;
+    }
+
+    const recognition = new SpeechRecognition();
+    recognition.continuous = true;
+    recognition.interimResults = false;
+    recognition.lang = 'en-US';
+
+    recognition.onresult = async event => {
+        if (!state.wakeWordEnabled || state.isRecording || state.mode !== 'hologram') return;
+        const currentOrb = getCurrentOrbState();
+        if (currentOrb !== 'idle') return;
+
+        const lastResultIndex = event.resultIndex;
+        const transcript = (event.results[lastResultIndex][0].transcript || '').toLowerCase().trim();
+        console.log('[WakeWord] Heard:', transcript);
+
+        // Check if wake word matches "hacker house", "hey hacker", "hacker", "radar"
+        if (transcript.includes('hacker') || transcript.includes('radar') || transcript.includes('house')) {
+            console.log('[WakeWord] Triggered!');
+            triggerWakeActivation();
+        }
+    };
+
+    recognition.onerror = event => {
+        console.warn('[WakeWord] Recognition error:', event.error);
+        if (state.wakeWordEnabled && state.mode === 'hologram' && getCurrentOrbState() === 'idle') {
+            setTimeout(() => {
+                try { recognition.start(); } catch(_) {}
+            }, 1000);
+        }
+    };
+
+    recognition.onend = () => {
+        if (state.wakeWordEnabled && state.mode === 'hologram' && getCurrentOrbState() === 'idle') {
+            try { recognition.start(); } catch(_) {}
+        }
+    };
+
+    state.wakeWordRecognition = recognition;
+    startWakeWordListener();
+}
+
+function startWakeWordListener() {
+    if (!state.wakeWordEnabled || !state.wakeWordRecognition || state.mode !== 'hologram') return;
+    const currentOrb = getCurrentOrbState();
+    if (currentOrb !== 'idle') return;
+
+    try {
+        state.wakeWordRecognition.start();
+        console.log('[WakeWord] Listener started');
+    } catch (err) {
+        // Safe to ignore
+    }
+}
+
+function stopWakeWordListener() {
+    if (state.wakeWordRecognition) {
+        try {
+            state.wakeWordRecognition.stop();
+            console.log('[WakeWord] Listener stopped');
+        } catch (err) {
+            // Safe to ignore
+        }
+    }
+}
+
+async function triggerWakeActivation() {
+    setHologramState('awakened');
+    stopWakeWordListener();
+
+    // 0.4s pause for quick acknowledgment pulse before starting mic stream
+    await new Promise(resolve => setTimeout(resolve, 400));
+    await startRecording('hologram');
+}
+
+// ═══════════════════════════════════════════════════════════
+// Live Microphone Waveform Amplitude Analyzer
+// ═══════════════════════════════════════════════════════════
+
+let audioCtx = null;
+let analyser = null;
+let animFrameId = null;
+
+function startAmplitudeAnalyzer(stream) {
+    try {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        if (!AudioContext) return;
+
+        audioCtx = new AudioContext();
+        analyser = audioCtx.createAnalyser();
+        analyser.fftSize = 64;
+        
+        const source = audioCtx.createMediaStreamSource(stream);
+        source.connect(analyser);
+
+        const bufferLength = analyser.frequencyBinCount;
+        const dataArray = new Uint8Array(bufferLength);
+        const spans = document.querySelectorAll('#hologram-waveform span');
+
+        function updateWaveform() {
+            if (!analyser) return;
+            analyser.getByteFrequencyData(dataArray);
+
+            spans.forEach((span, i) => {
+                const binValue = dataArray[i % bufferLength] || 0;
+                const percent = binValue / 255;
+                const height = 4 + (percent * 36);
+                span.style.height = `${height}px`;
+            });
+
+            animFrameId = requestAnimationFrame(updateWaveform);
+        }
+
+        $('hologram-orb').classList.add('live-reactive');
+        updateWaveform();
+    } catch (err) {
+        console.warn('Failed to start audio analyzer:', err);
+    }
+}
+
+function stopAmplitudeAnalyzer() {
+    if (animFrameId) {
+        cancelAnimationFrame(animFrameId);
+        animFrameId = null;
+    }
+    if (audioCtx) {
+        audioCtx.close();
+        audioCtx = null;
+    }
+    analyser = null;
+    
+    const spans = document.querySelectorAll('#hologram-waveform span');
+    spans.forEach(span => {
+        span.style.height = '';
+    });
+    $('hologram-orb').classList.remove('live-reactive');
+}
+
