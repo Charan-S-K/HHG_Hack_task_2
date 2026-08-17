@@ -31,7 +31,7 @@ const state = {
     benchmarkRunning: false,
     benchmarkPollInterval: null,
     strategySelected: () => document.getElementById('strategy-select').value,
-    wakeWordEnabled: true,
+    wakeWordEnabled: false,
     wakeWordRecognition: null,
 };
 
