@@ -337,17 +337,39 @@ body {
   75%      { transform: translateX(4px); }
 }
 
-/* awakened */
-.hologram-orb-awakened .h-ring { animation-duration: 0.3s !important; opacity: 0.8 !important; }
-.hologram-orb-awakened .h-core {
-  background: radial-gradient(circle at 40% 40%, hsl(344, 90%, 75%), hsl(344, 90%, 55%));
-  box-shadow: 0 0 50px var(--rose-glow), 0 4px 24px rgba(0,0,0,0.5);
-  animation: awakened-pulse 0.4s ease-out;
+/* Hover proximity animations (desktop only) */
+#hologram-orb {
+  transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), filter 0.3s ease;
 }
-@keyframes awakened-pulse {
-  0% { transform: scale(1.0); }
-  50% { transform: scale(1.3); filter: brightness(1.3); }
-  100% { transform: scale(1.0); }
+@media (hover: hover) {
+  #hologram-orb:hover {
+    transform: scale(1.08);
+    filter: brightness(1.15);
+    cursor: pointer;
+  }
+}
+
+/* awakened visual state (attention caught beat) */
+.hologram-orb-awakened .h-ring {
+  animation: ring-expand-pulse 0.4s ease-out !important;
+  opacity: 0.9 !important;
+  border-color: var(--rose) !important;
+}
+.hologram-orb-awakened .h-core {
+  background: radial-gradient(circle at 40% 40%, #fff 20%, var(--rose) 80%);
+  box-shadow: 0 0 60px var(--rose-glow), 0 4px 24px rgba(216, 63, 115, 0.7);
+  transform: scale(1.3);
+  transition: transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+@keyframes ring-expand-pulse {
+  0% { transform: scale(1); opacity: 0.2; }
+  50% { transform: scale(1.45); opacity: 0.95; }
+  100% { transform: scale(1.2); opacity: 0.4; }
+}
+
+/* Override standard css animations for live-reactive amplitudes */
+.hologram-orb-listening.live-reactive .h-waveform span {
+  animation: none !important;
 }
 
 /* Wake word control styles */

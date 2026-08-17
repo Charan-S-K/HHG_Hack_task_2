@@ -757,9 +757,13 @@ function initWakeWordListener() {
         const transcript = (event.results[lastResultIndex][0].transcript || '').toLowerCase().trim();
         console.log('[WakeWord] Heard:', transcript);
 
-        // Check if wake word matches "hacker house", "hey hacker", "hacker", "radar"
-        if (transcript.includes('hacker') || transcript.includes('radar') || transcript.includes('house')) {
-            console.log('[WakeWord] Triggered!');
+        // Clean up punctuation for robust string sequence matching
+        const cleaned = transcript.replace(/[,.?!]/g, '').trim();
+
+        // Match only the full multi-word phrase, not individual words
+        if (cleaned.includes('hey hacker house') || cleaned.includes('hey hackerhouse') || 
+            cleaned.includes('hacker house') || cleaned.includes('hackerhouse')) {
+            console.log('[WakeWord] Triggered phrase sequence!');
             triggerWakeActivation();
         }
     };
@@ -810,10 +814,41 @@ function stopWakeWordListener() {
 async function triggerWakeActivation() {
     setHologramState('awakened');
     stopWakeWordListener();
+    playWakeSound();
 
-    // 0.4s pause for quick acknowledgment pulse before starting mic stream
-    await new Promise(resolve => setTimeout(resolve, 400));
+    // 0.8s pause for visual expansion and audio chime before starting mic stream
+    await new Promise(resolve => setTimeout(resolve, 800));
     await startRecording('hologram');
+}
+
+function playWakeSound() {
+    try {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        if (!AudioContext) return;
+        const ctx = new AudioContext();
+        
+        // High, crisp rising Jarvis-style chime
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        
+        osc.type = 'sine';
+        const now = ctx.currentTime;
+        
+        // Double tone frequency sweep: 600Hz -> 880Hz
+        osc.frequency.setValueAtTime(600, now);
+        osc.frequency.exponentialRampToValueAtTime(880, now + 0.15);
+        
+        gain.gain.setValueAtTime(0.08, now); // low, polite volume
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+        
+        osc.start(now);
+        osc.stop(now + 0.35);
+    } catch (err) {
+        console.warn('Audio feedback failed:', err);
+    }
 }
 
 // ═══════════════════════════════════════════════════════════
