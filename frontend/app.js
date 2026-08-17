@@ -12,6 +12,10 @@
 
 'use strict';
 
+const BACKEND_URL = window.location.origin.includes('localhost') || window.location.origin.includes('127.0.0.1')
+    ? ''
+    : 'https://hh-goa-voice-radar.onrender.com'; // Deployed Backend URL fallback for separate hosting (e.g. Vercel)
+
 // ═══════════════════════════════════════════════════════════
 // State
 // ═══════════════════════════════════════════════════════════
@@ -212,7 +216,7 @@ async function processAudio(audioBlob, mode) {
     let transcript = null, languageCode = null;
 
     try {
-        const sttRes = await fetch('/api/stt', { method: 'POST', body: formData });
+        const sttRes = await fetch(`${BACKEND_URL}/api/stt`, { method: 'POST', body: formData });
 
         if (!sttRes.ok) {
             const err = await sttRes.json().catch(() => ({}));
@@ -274,7 +278,7 @@ async function submitQuery(queryText, languageCode = null, mode = null) {
     let result = null;
 
     try {
-        const res = await fetch('/api/query', {
+        const res = await fetch(`${BACKEND_URL}/api/query`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ query: queryText, language_code: languageCode, strategy }),
@@ -452,7 +456,7 @@ function escapeHtml(str) {
 
 async function loadBenchmarkResults() {
     try {
-        const res = await fetch('/api/benchmark/results');
+        const res = await fetch(`${BACKEND_URL}/api/benchmark/results`);
         if (!res.ok) return;
         const data = await res.json();
 
@@ -566,7 +570,7 @@ async function triggerBenchmark() {
     $('run-benchmark-btn').disabled = true;
 
     try {
-        const res = await fetch('/api/benchmark/run', {
+        const res = await fetch(`${BACKEND_URL}/api/benchmark/run`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ strategy, max_queries: 100 }),
