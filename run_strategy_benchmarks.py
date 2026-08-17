@@ -12,9 +12,9 @@ print("RUNNING BENCHMARK COMPARISON ACROSS ALL 4 CHUNKING STRATEGIES")
 print("================================================================")
 
 for strat in strategies:
-    print(f"\n--- Benchmarking Strategy: {strat} (50 queries, seed=42) ---")
+    print(f"\n--- Benchmarking Strategy: {strat} (10 queries, seed=42) ---")
     t0 = time.time()
-    rep = run_benchmark(strategy=strat, max_queries=50)
+    rep = run_benchmark(strategy=strat, max_queries=10)
     elapsed = time.time() - t0
     
     overall = rep.get("overall", {}).get("excl_stt_latency_s", {})

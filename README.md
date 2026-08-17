@@ -1,6 +1,16 @@
-# HH Goa Voice Radar — RUN 2
+# HH Goa Voice Radar — RUN 3 Refinement
 
 A multilingual, voice-enabled RAG (Retrieval-Augmented Generation) system built on FAISS + sentence-transformers (local) + Gemini API (generation) + Sarvam AI (STT). Supports queries in any Indian language and returns grounded answers in the same language the question was asked.
+
+> [!NOTE]
+> **Multilingual Grounding Design Choice**: Answers in non-Hindi languages are LLM-generated translations grounded in Hindi source content, not retrieved from native-language passages. This is a deliberate design choice to prevent index fragmentation while preserving grounding fidelity.
+
+### Paid Services & Free-Tier Limits
+The app requires no paid services beyond the explicitly approved developer API keys. It relies upon the following limits:
+* **Gemini API (gemini-flash-lite-latest)**: Relies on free-tier request limits (15 RPM / 1500 RPD).
+* **Sarvam AI STT API (saaras:v3)**: Relies on developer subscription free usage credits.
+* **Embedding Model (multilingual-e5-small)**: Runs locally on CPU (unlimited, zero-cost).
+* **Vector Index (FAISS)**: Runs locally on CPU (unlimited, zero-cost).
 
 ---
 
