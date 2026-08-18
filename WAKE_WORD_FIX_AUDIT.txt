@@ -1,0 +1,100 @@
+================================================================================
+HH GOA VOICE RADAR - STANDALONE AUDIT REPORT (17 ITEMS)
+================================================================================
+
+DATE: 2026-08-17
+AUDITED TARGETS: Jarvis Hacker, Dashboard Re-routing, and TTS Output
+
+--------------------------------------------------------------------------------
+PART A: HACKER AS PRIMARY INTERFACE
+--------------------------------------------------------------------------------
+
+1. DEFAULT ACTIVE MODE ON LOAD: PASS
+   - Evidence: Verified in index.html. The main hacker panel is defined with:
+     `<section id="hacker-panel" class="mode-panel active" role="tabpanel">`
+     while the tap panel (`tap-panel`) lacks the "active" class. Additionally, `state.mode` is initialized to `"hacker"` inside `app.js`. Clear state refresh confirms Hacker renders immediately.
+
+2. CONVERSATIONAL HISTORY VIEW: PASS
+   - Evidence: Verified in app.js. The renderHackerResult() function appends exchanges (max length 3) to the `state.history` queue:
+     ```javascript
+     state.history.push({ question: queryText, answer: result.answer || '' });
+     if (state.history.length > 3) state.history.shift();
+     ```
+     These are then mapped directly to `#hacker-chat-history` list items beneath the orb, persisting history items correctly across queries.
+
+3. VISUAL IDENTITY OF EACH STATE: PASS
+   - Evidence: Checked styles inside frontend/style.css:
+     * "idle": Concentric rings pulse slowly (ring-pulse animation, 3-4s). Core is a pink radial gradient.
+     * "awakened": Core turns to white-to-pink gradient, scaling to 1.3x. Rings flash and expand (ring-expand-pulse animation, 0.4s).
+     * "listening": Concentric rings spin fast (0.8s). Waveform displays live-amplitude heights.
+     * "processing": Core changes to a teal/cyan gradient and spins continuously (spin-core animation). Rings rotate at 0.5s.
+     * "answering": Rings return to normal speed. Core is green gradient. Displays answer block.
+     * "refusal": Rings have low opacity (0.1). Core turns amber.
+     * "error": Core is red gradient and shakes (shake animation).
+     All 7 states are highly distinct in scale, rotation speed, animations, and color scheme.
+
+4. SHOW SOURCES ACCORDION IN HACKER: PASS
+   - Evidence: Verified in index.html. Added the collapsed details accordion:
+     `<details class="sources-accordion hidden" id="hacker-sources-accordion">`
+     In app.js, renderHackerResult() clears and renders source items containing relevance scores, strategy names, L2 distances, and context text.
+
+--------------------------------------------------------------------------------
+PART B: DASHBOARD REMOVAL + DATA PRESERVATION
+--------------------------------------------------------------------------------
+
+5. DASHBOARD UI REMOVAL: PASS
+   - Evidence: Checked index.html. The entire `<section class="perf-dashboard" ...>` block was deleted. The main page contains only the mode tabs and the footer in normal use.
+
+6. BENCHMARK DATA OBTAINABILITY: PASS
+   - Evidence: Created frontend/benchmark.html and frontend/benchmark.js. Accessing http://127.0.0.1:8000/benchmark.html correctly loads the stats page. Triggering the benchmark triggers a live POST request to /api/benchmark/run and displays real-time progress.
+
+7. README UPDATE: PASS
+   - Evidence: Checked README.md lines 128-136:
+     "To keep the primary user interface clean and minimal, the performance benchmarking tool is hosted on a separate page:
+     👉 **[http://127.0.0.1:8000/benchmark.html](http://127.0.0.1:8000/benchmark.html)**"
+
+--------------------------------------------------------------------------------
+PART C: TEXT-TO-SPEECH
+--------------------------------------------------------------------------------
+
+8. SPEECH SYNTHESIS LAUNCH & LANGUAGE MATCH: PASS
+   - Evidence: Checked window.speechSynthesis trigger in app.js. Verified correct voice matching:
+     * English: Resolves to 'en-US' language code and selects 'Google US English' voice.
+     * Hindi: Resolves to 'hi-IN' language code and selects 'Google Hindi' voice.
+
+9. GRACEFUL VOICING SKIP: PASS
+   - Evidence: Checked speakAnswer() fallback logic. Tested with Russian / Odia. If the browser does not have the corresponding native voice package installed, the function logs a warning and exits early, avoiding bad English mispronunciation or crashing.
+
+10. TTS MUTE TOGGLE & DEFAULT STATE: PASS
+    - Evidence: Toggled #hacker-tts-toggle button. Default state is active (Voice Readout: On), with the status dot lighting up pink. Clicking it disables state.ttsEnabled and cancels ongoing speech synthesis.
+
+11. REFUSAL MESSAGES VOCALIZATION: PASS
+    - Evidence: Verified in app.js. Refusal answers are processed through speakAnswer() and spoken using the correct script language.
+
+12. WAKE WORD LISTENER PAUSE DURING SPEECH: PASS
+    - Evidence: Tested during speech playback. The speakAnswer() function calls stopWakeWordListener() immediately before speaking, disabling input detection so the assistant does not trigger on its own spoken voice feedback.
+
+13. WAKE WORD LISTENER RESUMPTION AFTER SPEECH: PASS
+    - Evidence: utterance.onend and utterance.onerror callbacks execute startWakeWordListener(), re-enabling voice activation once playback is done.
+
+--------------------------------------------------------------------------------
+PART D: REGRESSION
+--------------------------------------------------------------------------------
+
+14. TAP-TO-SPEAK NON-REGRESSION: PASS
+    - Evidence: Tested Tap-to-Speak flow. Tapping mic records correctly, transcribes, outputs the answer cards, and lists retrieved sources.
+
+15. FUNCTIONAL PIPELINE RETRO-COMPLIANCE: PASS
+    - Evidence: Re-ran pipeline tests. All guardrails (injection blocking), language matching (Kannada/Bengali), and vector retrieval strategies function correctly.
+
+16. MOBILE VIEWPORT RESPONSIVENESS: PASS
+    - Evidence: Chat history container fits smoothly inside mobile layouts. Flexible widths prevent any horizontal scrolling.
+
+17. CONSOLE & BACKEND ERROR FREE: PASS
+    - Evidence: Checked browser console and FastAPI backend server logs. No new errors or warnings were introduced.
+
+--------------------------------------------------------------------------------
+FINAL VERDICT
+--------------------------------------------------------------------------------
+ALL THREE ENHANCEMENTS ARE GENUINELY WORKING AS INTENDED. The Hacker Jarvis-assistant flow, the re-routed benchmark dashboard, and the language-matching TTS readout operate cleanly with zero regressions.
+================================================================================

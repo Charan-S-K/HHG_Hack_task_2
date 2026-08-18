@@ -9,21 +9,32 @@
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;1,500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Imbue:wght@400;700;900&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <!-- ── Beach Background Landscape ──────────────── -->
+    <div class="beach-background" aria-hidden="true"></div>
+
     <div class="app-shell">
 
         <!-- ── Header ───────────────────────────────────── -->
         <header class="app-header">
             <div class="header-inner">
-                <div class="brand">
-                    <span class="brand-dot"></span>
-                    <h1 class="brand-name">HH Goa Voice Radar</h1>
+                <div class="header-left">
+                    <a href="https://x.com/247pmstudio" target="_blank" class="studio-logo" aria-label="2:47 PM Studio profile">
+                        <span class="logo-time">2:47<span class="logo-pm">PM</span></span>
+                        <span class="logo-text">STUDIO</span>
+                    </a>
                 </div>
-                <p class="brand-sub">Multilingual RAG Assistant · RUN 2</p>
+                <div class="brand-center">
+                    <div class="brand">
+                        <span class="brand-dot"></span>
+                        <h1 class="brand-name">Hacker <span class="brand-pink">गोवा</span> House</h1>
+                    </div>
+                    <p class="brand-sub">Voice Radar | Multilingual RAG</p>
+                </div>
             </div>
         </header>
 
@@ -44,6 +55,14 @@
                         <path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v4M8 23h8"/>
                     </svg>
                     Tap to Speak
+                </button>
+            </div>
+
+            <!-- Shared Voice Readout Toggle -->
+            <div class="shared-voice-controls">
+                <button id="hologram-tts-toggle" class="tts-toggle-btn active" title="Toggle text-to-speech feedback">
+                    <span class="tts-status-dot"></span>
+                    Voice Readout: On
                 </button>
             </div>
 
@@ -93,6 +112,15 @@
                         <button id="hologram-text-btn" class="hologram-text-btn" title="Type a query instead">
                             Type a query
                         </button>
+                        <button id="hologram-exit-session" class="hologram-exit-btn hidden" title="End continuous conversation">
+                            End conversation
+                        </button>
+                        <div class="hologram-voice-controls">
+                            <div class="wake-word-badge">
+                                <span class="wake-status-dot active"></span>
+                                Wake Word: "Hey Hacker House"
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Hologram answer display -->
@@ -106,6 +134,23 @@
                         </div>
                     </div>
 
+                    <!-- Conversational History -->
+                    <div id="hologram-history-container" class="hologram-history-container hidden">
+                        <h3 class="history-title">Conversational History</h3>
+                        <div id="hologram-chat-history" class="hologram-chat-history"></div>
+                    </div>
+
+                    <!-- Sources Accordion -->
+                    <details class="sources-accordion hidden" id="hologram-sources-accordion">
+                        <summary class="sources-summary">
+                            <span>Show sources</span>
+                            <span class="sources-count" id="hologram-sources-count"></span>
+                        </summary>
+                        <div class="sources-body" id="hologram-sources-body"></div>
+                    </details>
+
+
+
                 </div>
             </section>
 
@@ -115,13 +160,16 @@
 
                     <!-- Recording panel -->
                     <div class="tap-record-area">
-                        <button id="tap-mic-btn" class="tap-mic-button" aria-label="Start recording">
-                            <svg class="tap-mic-icon" viewBox="0 0 24 24" fill="currentColor">
-                                <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/>
-                                <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/>
-                            </svg>
-                            <div class="tap-pulse"></div>
-                        </button>
+                        <div class="tap-mic-container">
+                            <button id="tap-mic-btn" class="tap-mic-button" aria-label="Start recording">
+                                <svg class="tap-mic-icon" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/>
+                                    <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/>
+                                </svg>
+                                <div class="tap-pulse"></div>
+                            </button>
+                            <div class="tap-mic-dashed-ring"></div>
+                        </div>
                         <p class="tap-label" id="tap-label">Tap to Speak</p>
 
                         <!-- Live transcription display -->
@@ -175,55 +223,11 @@
 
         </main>
 
-        <!-- ── Performance Dashboard ─────────────────────── -->
-        <section class="perf-dashboard" id="perf-dashboard">
-            <div class="perf-header">
-                <h2 class="perf-title">Performance Dashboard</h2>
-                <div class="perf-actions">
-                    <button id="run-benchmark-btn" class="perf-btn primary">Run Benchmark</button>
-                    <button id="test-refusal-btn" class="perf-btn secondary">Test Refusal</button>
-                </div>
-            </div>
 
-            <!-- Benchmark status / running indicator -->
-            <div id="benchmark-status-bar" class="benchmark-status-bar hidden">
-                <div class="bench-spinner"></div>
-                <span id="benchmark-status-text">Benchmark running…</span>
-                <span id="benchmark-progress-text" class="bench-progress"></span>
-            </div>
-
-            <!-- Stats table -->
-            <div id="perf-stats-wrap" class="perf-stats-wrap">
-                <p class="perf-empty" id="perf-empty-msg">No benchmark data yet. Run the benchmark to see real latency numbers.</p>
-
-                <table class="perf-table hidden" id="perf-table">
-                    <thead>
-                        <tr>
-                            <th>Stage</th>
-                            <th>P50</th>
-                            <th>P70</th>
-                            <th>P100</th>
-                            <th>Avg</th>
-                            <th>Min</th>
-                            <th>Max</th>
-                            <th>N</th>
-                        </tr>
-                    </thead>
-                    <tbody id="perf-table-body"></tbody>
-                </table>
-
-                <!-- Notes -->
-                <div class="perf-notes hidden" id="perf-notes">
-                    <p id="perf-meets-target"></p>
-                    <p id="perf-bottleneck"></p>
-                    <p class="perf-stt-note" id="perf-stt-note"></p>
-                </div>
-            </div>
-        </section>
 
         <!-- ── Footer ────────────────────────────────────── -->
         <footer class="app-footer">
-            <p>© 2026 HH Goa Voice Radar · RUN 2 · <span id="footer-strategy"></span></p>
+            <p>© 2026 HH Goa Voice Radar · RUN 3 · <span id="footer-strategy"></span></p>
         </footer>
 
     </div>

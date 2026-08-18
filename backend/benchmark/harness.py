@@ -145,6 +145,10 @@ def run_benchmark(
     for i, query in enumerate(queries):
         q_start = time.monotonic()
 
+        # Respect API rate limits (15 RPM -> ~4s interval) to prevent 429 quota exhaustion
+        if i > 0:
+            time.sleep(3.0)
+
         try:
             pipeline_result = run_pipeline(
                 query_text=query,

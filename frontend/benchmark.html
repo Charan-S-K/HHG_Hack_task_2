@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Performance Benchmark | HH Goa Voice Radar</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+    <style>
+        .benchmark-page-container {
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+        .benchmark-back-btn {
+            background: transparent;
+            border: 1px solid var(--forest-light);
+            color: var(--cream);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            margin-bottom: 20px;
+            transition: all 0.2s ease;
+        }
+        .benchmark-back-btn:hover {
+            border-color: var(--rose);
+            color: var(--rose);
+            background: rgba(216, 63, 115, 0.06);
+        }
+    </style>
+</head>
+<body>
+    <div class="benchmark-page-container">
+        <a href="/" class="benchmark-back-btn">← Back to Voice Radar</a>
+        
+        <section class="perf-dashboard" id="perf-dashboard" style="display: block;">
+            <div class="perf-header">
+                <h2 class="perf-title">Performance Benchmark</h2>
+                <div class="perf-actions">
+                    <button id="run-benchmark-btn" class="perf-btn primary">Run Benchmark</button>
+                    <button id="test-refusal-btn" class="perf-btn secondary">Test Refusal</button>
+                </div>
+            </div>
+
+            <!-- Benchmark status / running indicator -->
+            <div id="benchmark-status-bar" class="benchmark-status-bar hidden">
+                <div class="bench-spinner"></div>
+                <span id="benchmark-status-text">Benchmark running…</span>
+                <span id="benchmark-progress-text" class="bench-progress"></span>
+            </div>
+
+            <!-- Stats table -->
+            <div id="perf-stats-wrap" class="perf-stats-wrap">
+                <p class="perf-empty" id="perf-empty-msg">No benchmark data yet. Run the benchmark to see real latency numbers.</p>
+
+                <table class="perf-table hidden" id="perf-table">
+                    <thead>
+                        <tr>
+                            <th>Stage</th>
+                            <th>P50</th>
+                            <th>P70</th>
+                            <th>P100</th>
+                            <th>Avg</th>
+                            <th>Min</th>
+                            <th>Max</th>
+                            <th>N</th>
+                        </tr>
+                    </thead>
+                    <tbody id="perf-table-body"></tbody>
+                </table>
+
+                <!-- Notes -->
+                <div class="perf-notes hidden" id="perf-notes">
+                    <p id="perf-meets-target"></p>
+                    <p id="perf-bottleneck"></p>
+                    <p class="perf-stt-note" id="perf-stt-note"></p>
+                </div>
+            </div>
+        </section>
+    </div>
+    
+    <script src="benchmark.js"></script>
+</body>
+</html>
