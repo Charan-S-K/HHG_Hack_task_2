@@ -5,30 +5,30 @@
 
 /* ── Design Tokens ───────────────────────────────────────── */
 :root {
-  --bg:          #0A1E14; /* Deep Forest Green */
-  --bg-surface:  #12291B; /* Secondary deep green surface */
-  --bg-raised:   #1A3B28; /* Highlighted surface/inputs */
-  --border:      rgba(250, 246, 240, 0.10); /* Cream borders */
-  --border-md:   rgba(250, 246, 240, 0.18);
+  --bg:          #0B6A3F; /* Official HH Goa Forest Green */
+  --bg-surface:  #085432; /* Secondary dark green */
+  --bg-raised:   #064428; /* Highlighted inputs/panel surfaces */
+  --border:      rgba(252, 248, 237, 0.12); /* Cream borders */
+  --border-md:   rgba(252, 248, 237, 0.20);
 
-  --cream:       #FAF6F0; /* Cream cards/surfaces */
-  --cream-dark:  #E8E2D7;
-  --cream-text:  #0A1E14; /* Dark green text inside cream cards */
+  --cream:       #FCF8ED; /* Official HH Goa Warm Cream Card Surface */
+  --cream-dark:  #ECE7D9;
+  --cream-text:  #0B6A3F; /* Forest green text inside cream cards */
 
-  --rose:        #D83F73; /* Pink accent */
-  --rose-hover:  #BF3261;
-  --rose-glow:   rgba(216, 63, 115, 0.30);
-  --rose-subtle: rgba(216, 63, 115, 0.12);
+  --rose:        #E6007A; /* Official HH Goa Vibrant Magenta/Pink */
+  --rose-hover:  #C70068;
+  --rose-glow:   rgba(230, 0, 122, 0.35);
+  --rose-subtle: rgba(230, 0, 122, 0.15);
 
-  --teal:        #2EC4B6; /* Minty/teal accent */
-  --teal-subtle: rgba(46, 196, 182, 0.12);
+  --teal:        #FFD200; /* Official HH Goa Bright Yellow Accent */
+  --teal-subtle: rgba(255, 210, 0, 0.15);
 
-  --text:        #FAF6F0; /* Cream text on dark background */
-  --text-muted:  #A4BFA8; /* Green-grey muted text */
-  --text-dim:    #698C72;
+  --text:        #FCF8ED; /* Cream text on green backgrounds */
+  --text-muted:  #A7D4BF; /* Muted green-gray text */
+  --text-dim:    #75A88E;
 
-  --font-sans:   'JetBrains Mono', 'Courier New', monospace; /* Mono body typography */
-  --font-serif:  'Playfair Display', Georgia, serif; /* Serif heading typography */
+  --font-sans:   'JetBrains Mono', 'Courier New', monospace; /* Monospace body matching screenshots */
+  --font-serif:  'Imbue', serif; /* Imbue font for official condensed serif headings */
   --font-mono:   'JetBrains Mono', 'Courier New', monospace;
 
   --radius-sm:   6px;
@@ -73,10 +73,26 @@ body {
   border-bottom: 1px solid var(--border);
 }
 .header-inner {
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1.5rem;
+  width: 100%;
+}
+.brand-center {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 0.4rem;
+  flex-grow: 1;
+}
+.header-left {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  flex-shrink: 0;
 }
 .brand {
   display: flex;
@@ -93,14 +109,15 @@ body {
 .brand-name {
   font-family: var(--font-serif);
   font-size: clamp(1.6rem, 5vw, 2.4rem);
-  font-weight: 700;
-  letter-spacing: -0.02em;
+  font-weight: 800;
+  letter-spacing: -0.01em;
   color: var(--text);
+  text-transform: uppercase;
 }
 .brand-sub {
   font-family: var(--font-mono);
   font-size: 0.75rem;
-  color: var(--text-muted);
+  color: var(--teal); /* Yellow accent color! */
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
@@ -171,6 +188,27 @@ body {
   transition: var(--transition);
 }
 .strategy-select:focus { border-color: var(--rose); }
+
+/* Shared Voice Controls */
+.shared-voice-controls {
+  display: flex;
+  align-items: center;
+}
+
+/* Static Wake Word Badge */
+.wake-word-badge {
+  border: 1px solid var(--rose);
+  color: var(--rose);
+  background: rgba(230, 0, 122, 0.06);
+  padding: 6px 14px;
+  font-size: 0.75rem;
+  font-family: var(--font-mono);
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 0 10px rgba(230, 0, 122, 0.1);
+}
 
 /* ── Mode Panels ─────────────────────────────────────────── */
 .main-content { position: relative; }
@@ -456,6 +494,20 @@ body {
 }
 .hologram-text-btn:hover { color: var(--text-muted); }
 
+.hologram-exit-btn {
+  background: none;
+  border: none;
+  color: var(--rose);
+  font-size: 0.78rem;
+  font-family: var(--font-mono);
+  cursor: pointer;
+  text-decoration: underline;
+  text-decoration-style: dotted;
+  transition: var(--transition);
+  margin-left: 10px;
+}
+.hologram-exit-btn:hover { color: #f86f9d; }
+
 /* Hologram answer card */
 .hologram-answer {
   width: 100%;
@@ -464,7 +516,7 @@ body {
   color: var(--cream-text);
   border-radius: var(--radius-lg);
   padding: 1.5rem;
-  box-shadow: var(--shadow-lg);
+  box-shadow: 8px 10px 0 rgba(0,0,0,0.25);
   position: relative;
   animation: fadeSlideIn 0.35s ease-out;
 }
@@ -650,7 +702,7 @@ body {
   background: var(--cream);
   color: var(--cream-text);
   border: none;
-  box-shadow: var(--shadow-md);
+  box-shadow: 8px 10px 0 rgba(0,0,0,0.25);
 }
 .answer-block-header {
   display: flex;
@@ -935,6 +987,105 @@ body {
 /* ── Shared utility ──────────────────────────────────────── */
 .hidden { display: none !important; }
 
+/* ── Hologram Voice Control & History Layouts ────────────── */
+.hologram-voice-controls {
+  margin-top: 14px;
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  align-items: center;
+}
+.wake-word-control, .tts-control {
+  display: flex;
+  align-items: center;
+}
+.wake-toggle-btn, .tts-toggle-btn {
+  background: transparent;
+  border: 1px solid var(--forest-light);
+  color: var(--cream);
+  padding: 6px 14px;
+  font-size: 0.75rem;
+  font-family: var(--font-mono);
+  border-radius: 20px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+  opacity: 0.8;
+}
+.wake-toggle-btn:hover, .tts-toggle-btn:hover {
+  opacity: 1;
+  background: rgba(250, 246, 240, 0.05);
+}
+.wake-toggle-btn.active, .tts-toggle-btn.active {
+  border-color: var(--rose);
+  color: var(--rose);
+  background: rgba(216, 63, 115, 0.06);
+}
+.wake-status-dot, .tts-status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #a0a0a0;
+  transition: background 0.2s ease;
+}
+.wake-toggle-btn.active .wake-status-dot {
+  background: var(--rose);
+  box-shadow: 0 0 8px var(--rose);
+}
+.tts-toggle-btn.active .tts-status-dot {
+  background: var(--rose);
+  box-shadow: 0 0 8px var(--rose);
+}
+
+/* Sleek Conversational History view */
+.hologram-history-container {
+  margin-top: 24px;
+  width: 100%;
+  max-width: 480px;
+  text-align: left;
+  border-top: 1px dashed var(--forest-light);
+  padding-top: 18px;
+}
+.history-title {
+  font-family: var(--font-serif);
+  font-size: 0.85rem;
+  color: var(--rose);
+  margin-bottom: 10px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+.hologram-chat-history {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-height: 180px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+.history-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  background: rgba(250, 246, 240, 0.03);
+  border: 1px solid var(--forest-light);
+  border-radius: 12px;
+  padding: 10px 14px;
+}
+.history-q {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--cream);
+  opacity: 0.7;
+}
+.history-a {
+  font-family: var(--font-serif);
+  font-size: 0.85rem;
+  color: var(--cream);
+}
+
+
 /* ── Responsive ──────────────────────────────────────────── */
 @media (max-width: 600px) {
   body { padding: 1rem 0.75rem 3rem; }
@@ -951,3 +1102,105 @@ body {
   .tap-mic-button { width: 76px; height: 76px; }
   .tap-mic-icon { width: 28px; height: 28px; }
 }
+
+/* ── HHG Signposts and Branding Accessories ────────────── */
+.brand-pink {
+  color: var(--rose);
+}
+
+
+/* ── Beach Background Landscape ──────────────────────────── */
+.beach-background {
+  position: fixed;
+  inset: -20px;
+  width: calc(100vw + 40px);
+  height: calc(100vh + 40px);
+  z-index: -1;
+  pointer-events: none;
+  overflow: hidden;
+  background-image: url('beach_background.jpg');
+  background-size: cover;
+  background-position: center bottom;
+  background-repeat: no-repeat;
+  opacity: 0.22;
+  animation: kenburns-bg 50s ease-in-out infinite;
+  transform-origin: center bottom;
+  will-change: transform;
+}
+
+@keyframes kenburns-bg {
+  0% {
+    transform: scale(1.02) translate(0, 0);
+  }
+  50% {
+    transform: scale(1.08) translate(-15px, -8px);
+  }
+  100% {
+    transform: scale(1.02) translate(0, 0);
+  }
+}
+
+
+
+/* ── 2:47PM Studio Logo ────────────────────────────────── */
+.studio-logo {
+  text-decoration: none;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  line-height: 0.85;
+  font-family: Impact, Haettenschweiler, "Arial Narrow Bold", sans-serif;
+  color: var(--teal); /* Sunshine yellow */
+  text-transform: uppercase;
+  user-select: none;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+  transform: rotate(-3deg);
+  opacity: 0.95;
+}
+.studio-logo:hover {
+  transform: rotate(-3deg) scale(1.05);
+  opacity: 1;
+}
+.logo-time {
+  font-size: 2.2rem;
+  letter-spacing: -0.01em;
+  font-weight: 900;
+  display: flex;
+  align-items: flex-end;
+}
+.logo-pm {
+  font-size: 1.05rem;
+  margin-left: 2px;
+  align-self: flex-start;
+  margin-top: 3px;
+  font-weight: 800;
+}
+.logo-text {
+  font-size: 1.35rem;
+  letter-spacing: 0.08em;
+  font-weight: 900;
+  margin-top: -2px;
+}
+
+
+
+@media (max-width: 768px) {
+  .header-inner {
+    flex-direction: column;
+    align-items: center;
+    gap: 1.2rem;
+  }
+  .header-left {
+    position: static;
+    transform: none;
+  }
+  .studio-logo {
+    transform: none;
+    align-items: center;
+  }
+  .studio-logo:hover {
+    transform: scale(1.05);
+  }
+}
+
+

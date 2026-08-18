@@ -9,21 +9,32 @@
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;1,500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Imbue:wght@400;700;900&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <!-- ── Beach Background Landscape ──────────────── -->
+    <div class="beach-background" aria-hidden="true"></div>
+
     <div class="app-shell">
 
         <!-- ── Header ───────────────────────────────────── -->
         <header class="app-header">
             <div class="header-inner">
-                <div class="brand">
-                    <span class="brand-dot"></span>
-                    <h1 class="brand-name">HH Goa Voice Radar</h1>
+                <div class="header-left">
+                    <a href="https://x.com/247pmstudio" target="_blank" class="studio-logo" aria-label="2:47 PM Studio profile">
+                        <span class="logo-time">2:47<span class="logo-pm">PM</span></span>
+                        <span class="logo-text">STUDIO</span>
+                    </a>
                 </div>
-                <p class="brand-sub">Multilingual RAG Assistant · RUN 3</p>
+                <div class="brand-center">
+                    <div class="brand">
+                        <span class="brand-dot"></span>
+                        <h1 class="brand-name">Hacker <span class="brand-pink">गोवा</span> House</h1>
+                    </div>
+                    <p class="brand-sub">Voice Radar | Multilingual RAG</p>
+                </div>
             </div>
         </header>
 
@@ -44,6 +55,14 @@
                         <path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v4M8 23h8"/>
                     </svg>
                     Tap to Speak
+                </button>
+            </div>
+
+            <!-- Shared Voice Readout Toggle -->
+            <div class="shared-voice-controls">
+                <button id="hologram-tts-toggle" class="tts-toggle-btn active" title="Toggle text-to-speech feedback">
+                    <span class="tts-status-dot"></span>
+                    Voice Readout: On
                 </button>
             </div>
 
@@ -93,11 +112,14 @@
                         <button id="hologram-text-btn" class="hologram-text-btn" title="Type a query instead">
                             Type a query
                         </button>
-                        <div class="wake-word-control">
-                            <button id="hologram-wake-toggle" class="wake-toggle-btn" title="Toggle voice activation wake word">
-                                <span class="wake-status-dot"></span>
-                                Wake Word: Muted
-                            </button>
+                        <button id="hologram-exit-session" class="hologram-exit-btn hidden" title="End continuous conversation">
+                            End conversation
+                        </button>
+                        <div class="hologram-voice-controls">
+                            <div class="wake-word-badge">
+                                <span class="wake-status-dot active"></span>
+                                Wake Word: "Hey Hacker House"
+                            </div>
                         </div>
                     </div>
 
@@ -111,6 +133,23 @@
                             <span class="meta-chip" id="hologram-chunks-chip"></span>
                         </div>
                     </div>
+
+                    <!-- Conversational History -->
+                    <div id="hologram-history-container" class="hologram-history-container hidden">
+                        <h3 class="history-title">Conversational History</h3>
+                        <div id="hologram-chat-history" class="hologram-chat-history"></div>
+                    </div>
+
+                    <!-- Sources Accordion -->
+                    <details class="sources-accordion hidden" id="hologram-sources-accordion">
+                        <summary class="sources-summary">
+                            <span>Show sources</span>
+                            <span class="sources-count" id="hologram-sources-count"></span>
+                        </summary>
+                        <div class="sources-body" id="hologram-sources-body"></div>
+                    </details>
+
+
 
                 </div>
             </section>
@@ -184,51 +223,7 @@
 
         </main>
 
-        <!-- ── Performance Dashboard ─────────────────────── -->
-        <section class="perf-dashboard" id="perf-dashboard">
-            <div class="perf-header">
-                <h2 class="perf-title">Performance Dashboard</h2>
-                <div class="perf-actions">
-                    <button id="run-benchmark-btn" class="perf-btn primary">Run Benchmark</button>
-                    <button id="test-refusal-btn" class="perf-btn secondary">Test Refusal</button>
-                </div>
-            </div>
 
-            <!-- Benchmark status / running indicator -->
-            <div id="benchmark-status-bar" class="benchmark-status-bar hidden">
-                <div class="bench-spinner"></div>
-                <span id="benchmark-status-text">Benchmark running…</span>
-                <span id="benchmark-progress-text" class="bench-progress"></span>
-            </div>
-
-            <!-- Stats table -->
-            <div id="perf-stats-wrap" class="perf-stats-wrap">
-                <p class="perf-empty" id="perf-empty-msg">No benchmark data yet. Run the benchmark to see real latency numbers.</p>
-
-                <table class="perf-table hidden" id="perf-table">
-                    <thead>
-                        <tr>
-                            <th>Stage</th>
-                            <th>P50</th>
-                            <th>P70</th>
-                            <th>P100</th>
-                            <th>Avg</th>
-                            <th>Min</th>
-                            <th>Max</th>
-                            <th>N</th>
-                        </tr>
-                    </thead>
-                    <tbody id="perf-table-body"></tbody>
-                </table>
-
-                <!-- Notes -->
-                <div class="perf-notes hidden" id="perf-notes">
-                    <p id="perf-meets-target"></p>
-                    <p id="perf-bottleneck"></p>
-                    <p class="perf-stt-note" id="perf-stt-note"></p>
-                </div>
-            </div>
-        </section>
 
         <!-- ── Footer ────────────────────────────────────── -->
         <footer class="app-footer">

@@ -75,11 +75,17 @@ _benchmark_total = 0
 
 # ── Pydantic models ───────────────────────────────────────────────────────
 
+class QueryHistoryItem(BaseModel):
+    question: str
+    answer: str
+
+
 class QueryRequest(BaseModel):
     query: str
     language_code: Optional[str] = None
     strategy: Optional[str] = None
     k: Optional[int] = None
+    history: Optional[List[QueryHistoryItem]] = None
 
 
 class QueryResponse(BaseModel):
@@ -229,11 +235,16 @@ def handle_query(payload: QueryRequest):
     k = payload.k or RETRIEVAL_K
 
     try:
+        history_list = None
+        if payload.history:
+            history_list = [{"question": h.question, "answer": h.answer} for h in payload.history]
+
         result = run_pipeline(
             query_text=query_text,
             language_code=payload.language_code,
             strategy=strategy,
             k=k,
+            history=history_list,
         )
         return _pipeline_result_to_response(result)
 

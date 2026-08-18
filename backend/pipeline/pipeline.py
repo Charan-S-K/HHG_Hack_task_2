@@ -209,12 +209,13 @@ def _stage_generate(
     chunks: List[Dict],
     target_language: str,
     result: PipelineResult,
+    history: Optional[List[Dict[str, str]]] = None,
 ) -> str:
     """Stage 7: LLM answer generation with retries."""
     from backend.llm_provider.gemini_llm import generate_answer
 
     def _do_generate():
-        return generate_answer(query_text, chunks, target_language=target_language)
+        return generate_answer(query_text, chunks, target_language=target_language, history=history)
 
     try:
         answer, retry_count = _retry_call(
@@ -266,6 +267,7 @@ def run_pipeline(
     language_code: str = None,
     strategy: str = None,
     k: int = None,
+    history: Optional[List[Dict[str, str]]] = None,
 ) -> PipelineResult:
     """
     Runs the full RAG pipeline for a text or audio query.
@@ -361,7 +363,7 @@ def run_pipeline(
 
         # ── Stage 7: Generate ─────────────────────────────────────────────
         t0 = _timer()
-        answer = _stage_generate(query_text, retrieve_out["chunks"], target_language, result)
+        answer = _stage_generate(query_text, retrieve_out["chunks"], target_language, result, history=history)
         result.latencies["generation"] = round(_timer() - t0, 4)
         logger.info("[%s] Stage 7 generate: len=%d %.4fs", request_id, len(answer), result.latencies["generation"])
 
