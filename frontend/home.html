@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HH Goa Voice Radar — RAG Voice Assistant</title>
+    <meta name="description" content="HH Goa Voice Radar: a multilingual RAG-powered voice assistant for hotel information. Ask in any language and get grounded answers.">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Imbue:wght@400;700;900&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- ── Beach Background Landscape ──────────────── -->
+    <div class="beach-background" aria-hidden="true"></div>
+
+    <div class="app-shell">
+
+        <!-- ── Header ───────────────────────────────────── -->
+        <header class="app-header">
+            <div class="header-inner">
+                <div class="header-left">
+                    <a href="https://x.com/247pmstudio" target="_blank" class="studio-logo" aria-label="2:47 PM Studio profile">
+                        <span class="logo-time">2:47<span class="logo-pm">PM</span></span>
+                        <span class="logo-text">STUDIO</span>
+                    </a>
+                </div>
+                <div class="brand-center">
+                    <div class="brand">
+                        <span class="brand-dot"></span>
+                        <h1 class="brand-name">Hacker <span class="brand-pink">गोवा</span> House</h1>
+                    </div>
+                    <p class="brand-sub">Voice Radar | Multilingual RAG</p>
+                </div>
+            </div>
+        </header>
+
+        <!-- ── Mode Switcher ─────────────────────────────── -->
+        <div class="mode-switcher-wrap">
+            <div class="mode-switcher" role="tablist" aria-label="Voice mode selection">
+                <button id="mode-hologram" class="mode-tab active" role="tab" aria-selected="true"
+                    aria-controls="hologram-panel" data-mode="hologram">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/>
+                    </svg>
+                    Hologram
+                </button>
+                <button id="mode-tap" class="mode-tab" role="tab" aria-selected="false"
+                    aria-controls="tap-panel" data-mode="tap">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+                        <path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v4M8 23h8"/>
+                    </svg>
+                    Tap to Speak
+                </button>
+            </div>
+
+            <!-- Shared Voice Readout Toggle -->
+            <div class="shared-voice-controls">
+                <button id="hologram-tts-toggle" class="tts-toggle-btn active" title="Toggle text-to-speech feedback">
+                    <span class="tts-status-dot"></span>
+                    Voice Readout: On
+                </button>
+            </div>
+
+            <!-- Strategy selector (shared) -->
+            <div class="strategy-selector">
+                <label for="strategy-select" class="strategy-label">Strategy</label>
+                <select id="strategy-select" class="strategy-select">
+                    <option value="hybrid" selected>Hybrid (default)</option>
+                    <option value="fixed">Fixed-size</option>
+                    <option value="sentence">Sentence</option>
+                    <option value="metadata">Metadata-aware</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- ── Main panels ───────────────────────────────── -->
+        <main class="main-content">
+
+            <!-- ═══════════════ HOLOGRAM MODE ═══════════════ -->
+            <section id="hologram-panel" class="mode-panel active" role="tabpanel" aria-labelledby="mode-hologram">
+                <div class="hologram-layout">
+
+                    <!-- Central animated orb -->
+                    <div class="hologram-center">
+                        <div class="hologram-rings-wrap" id="hologram-orb" aria-live="polite">
+                            <div class="h-ring h-ring-1"></div>
+                            <div class="h-ring h-ring-2"></div>
+                            <div class="h-ring h-ring-3"></div>
+                            <div class="h-core">
+                                <svg class="h-icon" id="hologram-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                    <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+                                    <path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v4M8 23h8"/>
+                                </svg>
+                            </div>
+                            <!-- Waveform bars (listening state) -->
+                            <div class="h-waveform" id="hologram-waveform">
+                                <span></span><span></span><span></span><span></span><span></span>
+                                <span></span><span></span><span></span><span></span><span></span>
+                            </div>
+                        </div>
+
+                        <p class="hologram-state-label" id="hologram-status">Ready to listen</p>
+
+                        <button id="hologram-mic-btn" class="hologram-action-btn" aria-label="Start listening">
+                            Tap to Speak
+                        </button>
+                        <button id="hologram-text-btn" class="hologram-text-btn" title="Type a query instead">
+                            Type a query
+                        </button>
+                        <button id="hologram-exit-session" class="hologram-exit-btn hidden" title="End continuous conversation">
+                            End conversation
+                        </button>
+                        <div class="hologram-voice-controls">
+                            <div class="wake-word-badge">
+                                <span class="wake-status-dot active"></span>
+                                Wake Word: "Hey Hacker House"
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Hologram answer display -->
+                    <div id="hologram-answer-wrap" class="hologram-answer hidden">
+                        <div class="answer-badge" id="hologram-refused-badge">Refusal</div>
+                        <p class="hologram-answer-text" id="hologram-answer-text"></p>
+                        <div class="hologram-meta-row">
+                            <span class="meta-chip" id="hologram-strategy-chip"></span>
+                            <span class="meta-chip" id="hologram-latency-chip"></span>
+                            <span class="meta-chip" id="hologram-chunks-chip"></span>
+                        </div>
+                    </div>
+
+                    <!-- Conversational History -->
+                    <div id="hologram-history-container" class="hologram-history-container hidden">
+                        <h3 class="history-title">Conversational History</h3>
+                        <div id="hologram-chat-history" class="hologram-chat-history"></div>
+                    </div>
+
+                    <!-- Sources Accordion -->
+                    <details class="sources-accordion hidden" id="hologram-sources-accordion">
+                        <summary class="sources-summary">
+                            <span>Show sources</span>
+                            <span class="sources-count" id="hologram-sources-count"></span>
+                        </summary>
+                        <div class="sources-body" id="hologram-sources-body"></div>
+                    </details>
+
+
+
+                </div>
+            </section>
+
+            <!-- ═══════════════ TAP TO SPEAK MODE ═══════════ -->
+            <section id="tap-panel" class="mode-panel" role="tabpanel" aria-labelledby="mode-tap">
+                <div class="tap-layout">
+
+                    <!-- Recording panel -->
+                    <div class="tap-record-area">
+                        <div class="tap-mic-container">
+                            <button id="tap-mic-btn" class="tap-mic-button" aria-label="Start recording">
+                                <svg class="tap-mic-icon" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/>
+                                    <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/>
+                                </svg>
+                                <div class="tap-pulse"></div>
+                            </button>
+                            <div class="tap-mic-dashed-ring"></div>
+                        </div>
+                        <p class="tap-label" id="tap-label">Tap to Speak</p>
+
+                        <!-- Live transcription display -->
+                        <div id="tap-transcript-live" class="tap-transcript-live hidden">
+                            <div class="transcript-dot"></div>
+                            <span id="tap-transcript-text">Listening…</span>
+                        </div>
+
+                        <button id="tap-cancel-btn" class="tap-cancel-btn hidden">Cancel</button>
+                    </div>
+
+                    <!-- Results area -->
+                    <div id="tap-results" class="tap-results hidden">
+
+                        <!-- Question -->
+                        <div class="result-block">
+                            <p class="result-label">Your question</p>
+                            <p class="result-question" id="tap-question"></p>
+                        </div>
+
+                        <!-- Answer (with refusal badge) -->
+                        <div class="result-block answer-block" id="tap-answer-block">
+                            <div class="answer-block-header">
+                                <p class="result-label">Answer</p>
+                                <span class="refused-pill hidden" id="tap-refused-pill">Refused</span>
+                            </div>
+                            <p class="result-answer" id="tap-answer"></p>
+                            <div class="answer-meta" id="tap-answer-meta"></div>
+                        </div>
+
+                        <!-- Sources accordion -->
+                        <details class="sources-accordion" id="tap-sources-accordion">
+                            <summary class="sources-summary">
+                                <span>Show sources</span>
+                                <span class="sources-count" id="tap-sources-count"></span>
+                            </summary>
+                            <div class="sources-body" id="tap-sources-body"></div>
+                        </details>
+
+                    </div>
+
+                    <!-- Text input fallback -->
+                    <div class="tap-text-fallback">
+                        <input type="text" id="tap-text-input" class="tap-text-input"
+                            placeholder="Or type your query here…" autocomplete="off">
+                        <button id="tap-text-submit" class="tap-text-submit">Ask</button>
+                    </div>
+
+                </div>
+            </section>
+
+        </main>
+
+
+
+        <!-- ── Footer ────────────────────────────────────── -->
+        <footer class="app-footer">
+            <p>© 2026 HH Goa Voice Radar · RUN 3 · <span id="footer-strategy"></span></p>
+        </footer>
+
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
