@@ -1,237 +1,547 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HH Goa Voice Radar — RAG Voice Assistant</title>
-    <meta name="description" content="HH Goa Voice Radar: a multilingual RAG-powered voice assistant for hotel information. Ask in any language and get grounded answers.">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <title>Hacker House Goa 2026 · Task 2 Prototype</title>
+  <meta name="description" content="Hacker House Goa 2026 — Task 2 Prototype. Voice-Enabled RAG Model. An immersive illustrated microsite." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;0,6..96,700;0,6..96,900;1,6..96,400;1,6..96,900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-    <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Imbue:wght@400;700;900&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    :root {
+      --green:    #006B3C;
+      --green-dk: #00381e;
+      --yellow:   #F5C518;
+      --yellow-lt:#FFDF58;
+      --pink:     #FF2A5F;
+      --cream:    #F5F0DC;
+      --dark:     #051A0E;
+      --dark-glow:rgba(0, 20, 10, 0.9);
+    }
 
-    <link rel="stylesheet" href="style.css">
+    html, body {
+      width: 100%; height: 100%;
+      overflow: hidden;
+      background: var(--green);
+      font-family: 'Space Mono', monospace;
+      user-select: none;
+    }
+
+    /* ── SCENE & VIEWPORT ── */
+    #scene {
+      position: fixed; inset: 0;
+      width: 100vw; height: 100vh;
+      overflow: hidden;
+      background: var(--green);
+      z-index: 1;
+    }
+
+    /* ── IMAGE LAYERS ── */
+    .img-layer {
+      position: absolute; top: 0; left: 0;
+      width: 100%; height: 100%;
+      object-fit: cover;
+      pointer-events: none;
+      will-change: transform, opacity;
+      opacity: 0;
+    }
+    
+    #layer1 { z-index: 1; }
+    #layer2 { z-index: 2; }
+    #layer3 { z-index: 3; }
+    #layer4 { z-index: 4; }
+    #layer5 { z-index: 5; }
+    #layer6 { z-index: 6; }
+
+    /* ── CONTENT OVERLAY (Z-INDEX 25: ALWAYS ON TOP) ── */
+    #content {
+      position: absolute; inset: 0;
+      z-index: 25;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      pointer-events: none;
+      padding: 1.5rem 1rem;
+    }
+
+    /* ── TITLE BLOCK ── */
+    .title-block {
+      text-align: center;
+      line-height: 1;
+      margin-bottom: 2rem;
+    }
+
+    .title-hacker,
+    .title-house {
+      display: block;
+      font-family: 'Bodoni Moda', serif;
+      font-weight: 900;
+      font-size: clamp(3.2rem, 9.5vw, 10rem);
+      color: var(--yellow);
+      letter-spacing: -0.02em;
+      text-transform: uppercase;
+      line-height: 0.88;
+      opacity: 0;
+      transform: translateY(30px);
+      /* High-visibility contrast outlines & multi-layer drop shadows */
+      -webkit-text-stroke: 2.5px var(--dark);
+      text-shadow:
+        0 6px 20px rgba(0, 0, 0, 0.85),
+        4px 4px 0 var(--dark),
+        -2px -2px 0 var(--dark),
+        2px -2px 0 var(--dark),
+        -2px 2px 0 var(--dark);
+    }
+
+    .title-row-goa {
+      display: flex;
+      align-items: baseline;
+      justify-content: center;
+      gap: 0.35em;
+      margin-top: 0.1em;
+    }
+
+    .title-goa {
+      font-family: 'Bodoni Moda', serif;
+      font-weight: 900;
+      font-style: italic;
+      font-size: clamp(2.2rem, 7vw, 7.2rem);
+      color: var(--pink);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      opacity: 0;
+      transform: translateY(24px) scale(0.95);
+      -webkit-text-stroke: 2px var(--dark);
+      text-shadow:
+        0 6px 18px rgba(0, 0, 0, 0.85),
+        3px 3px 0 var(--dark),
+        -1.5px -1.5px 0 var(--dark),
+        1.5px -1.5px 0 var(--dark);
+    }
+
+    .title-year {
+      font-family: 'Space Mono', monospace;
+      font-weight: 700;
+      font-size: clamp(0.85rem, 1.8vw, 1.6rem);
+      color: var(--cream);
+      letter-spacing: 0.22em;
+      opacity: 0;
+      transform: translateY(16px);
+      align-self: center;
+      -webkit-text-stroke: 1.2px var(--dark);
+      text-shadow:
+        0 4px 12px rgba(0, 0, 0, 0.9),
+        2px 2px 0 var(--dark);
+    }
+
+    /* ── TASK BLOCK ── */
+    .task-block {
+      text-align: center;
+      margin-bottom: 2.2rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.45rem;
+    }
+
+    .task-label {
+      display: inline-block;
+      font-family: 'Space Mono', monospace;
+      font-weight: 700;
+      font-size: clamp(0.62rem, 1.2vw, 0.92rem);
+      color: var(--cream);
+      letter-spacing: 0.36em;
+      text-transform: uppercase;
+      opacity: 0;
+      transform: translateY(18px);
+      padding: 0.35em 1.2em;
+      background: rgba(2, 28, 14, 0.75);
+      border: 1px solid rgba(245, 197, 24, 0.35);
+      border-radius: 3px;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.6), 2px 2px 0 var(--dark);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+    }
+
+    .task-main {
+      display: block;
+      font-family: 'Bodoni Moda', serif;
+      font-weight: 800;
+      font-size: clamp(1.2rem, 3.2vw, 2.9rem);
+      color: var(--yellow);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      line-height: 1.1;
+      opacity: 0;
+      transform: translateY(20px);
+      -webkit-text-stroke: 1.8px var(--dark);
+      text-shadow:
+        0 6px 18px rgba(0, 0, 0, 0.9),
+        3px 3px 0 var(--dark),
+        -1.5px -1.5px 0 var(--dark);
+    }
+
+    /* ── ENTER BUTTON ── */
+    #enter-btn {
+      pointer-events: all;
+      cursor: pointer;
+      position: relative;
+      z-index: 30;
+      background: var(--yellow);
+      color: var(--dark);
+      font-family: 'Space Mono', monospace;
+      font-weight: 700;
+      font-size: clamp(0.85rem, 1.6vw, 1.15rem);
+      letter-spacing: 0.24em;
+      text-transform: uppercase;
+      border: 2px solid var(--dark);
+      padding: 0.95em 2.8em;
+      border-radius: 2px;
+      box-shadow: 5px 5px 0 var(--dark);
+      opacity: 0;
+      transform: translateY(24px);
+      transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    #enter-btn:hover {
+      transform: translate(-2px, -2px);
+      box-shadow: 7px 7px 0 var(--dark);
+      background: #FFF0A0;
+    }
+
+    #enter-btn:active {
+      transform: translate(2px, 2px);
+      box-shadow: 2px 2px 0 var(--dark);
+    }
+
+    #enter-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    /* ── BALANCED OVERLAPPING ANIMATIONS (~4.5s TOTAL SEQUENCE) ── */
+    @keyframes fadeInSmooth {
+      0%   { opacity: 0; }
+      100% { opacity: 1; }
+    }
+
+    @keyframes riseSmooth {
+      0%   { opacity: 0; transform: translateY(38px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes slideLeftSmooth {
+      0%   { opacity: 0; transform: translate(-38px, 26px); }
+      100% { opacity: 1; transform: translate(0, 0); }
+    }
+
+    @keyframes slideRightSmooth {
+      0%   { opacity: 0; transform: translate(38px, 26px); }
+      100% { opacity: 1; transform: translate(0, 0); }
+    }
+
+    @keyframes framePalmsSmooth {
+      0%   { opacity: 0; transform: translateY(28px) scale(1.03); }
+      100% { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    @keyframes textFadeUpSmooth {
+      0%   { opacity: 0; transform: translateY(20px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes btnPopSmooth {
+      0%   { opacity: 0; transform: translateY(18px) scale(0.95); }
+      70%  { opacity: 1; transform: translateY(-2px) scale(1.02); }
+      100% { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    /* Staggered overlapping sequence */
+    .scene-ready #layer1 {
+      animation: fadeInSmooth 1.5s cubic-bezier(0.2, 0.8, 0.3, 1) 0s forwards;
+    }
+    .scene-ready #layer2 {
+      animation: fadeInSmooth 1.5s cubic-bezier(0.2, 0.8, 0.3, 1) 0s forwards;
+    }
+    .scene-ready #layer3 {
+      animation: fadeInSmooth 1.5s cubic-bezier(0.2, 0.8, 0.3, 1) 0s forwards;
+    }
+    .scene-ready #layer4 {
+      animation: slideLeftSmooth 0.4s cubic-bezier(0.16, 1, 0.3, 1) 2.0s forwards;
+    }
+    .scene-ready #layer5 {
+      animation: slideRightSmooth 0.4s cubic-bezier(0.16, 1, 0.3, 1) 2.4s forwards;
+    }
+    .scene-ready #layer6 {
+      animation: framePalmsSmooth 0.4s cubic-bezier(0.16, 1, 0.3, 1) 2.8s forwards;
+    }
+
+    /* Staggered typography & CTA */
+    .scene-ready .title-hacker {
+      animation: textFadeUpSmooth 0.4s cubic-bezier(0.16, 1, 0.3, 1) 3.20s forwards;
+    }
+    .scene-ready .title-house {
+      animation: textFadeUpSmooth 0.4s cubic-bezier(0.16, 1, 0.3, 1) 3.25s forwards;
+    }
+    .scene-ready .title-goa {
+      animation: textFadeUpSmooth 0.4s cubic-bezier(0.16, 1, 0.3, 1) 3.30s forwards;
+    }
+    .scene-ready .title-year {
+      animation: textFadeUpSmooth 0.4s cubic-bezier(0.16, 1, 0.3, 1) 3.35s forwards;
+    }
+    .scene-ready .task-label {
+      animation: textFadeUpSmooth 0.4s cubic-bezier(0.16, 1, 0.3, 1) 3.40s forwards;
+    }
+    .scene-ready .task-main {
+      animation: textFadeUpSmooth 0.4s cubic-bezier(0.16, 1, 0.3, 1) 3.45s forwards;
+    }
+    .scene-ready #enter-btn {
+      animation: btnPopSmooth 0.5s cubic-bezier(0.16, 1, 0.3, 1) 3.7s forwards;
+    }
+
+    /* ── TRANSITION OVERLAY ── */
+    #transition-overlay {
+      position: fixed; inset: 0; z-index: 100;
+      background: var(--green-dk);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.55s ease;
+    }
+    #transition-overlay.active { opacity: 1; pointer-events: all; }
+
+    .tr-heading {
+      font-family: 'Bodoni Moda', serif; font-weight: 900;
+      font-size: clamp(2.6rem, 7.5vw, 6.5rem);
+      color: var(--yellow); text-transform: uppercase;
+      letter-spacing: 0.08em; line-height: 1;
+      opacity: 0; transform: translateY(12px);
+      -webkit-text-stroke: 1.5px var(--dark);
+      text-shadow: 3px 3px 0 var(--dark);
+      transition: opacity 0.5s ease 0.3s, transform 0.5s ease 0.3s;
+    }
+    .tr-sub {
+      font-family: 'Space Mono', monospace;
+      font-weight: 700;
+      font-size: clamp(0.7rem, 1.5vw, 1.05rem);
+      color: var(--cream); letter-spacing: 0.3em; margin-top: 1rem;
+      opacity: 0;
+      text-shadow: 2px 2px 0 var(--dark);
+      transition: opacity 0.5s ease 0.5s;
+    }
+    #transition-overlay.active .tr-heading { opacity: 1; transform: translateY(0); }
+    #transition-overlay.active .tr-sub     { opacity: 1; }
+
+    .tr-bar-wrap {
+      margin-top: 2.8rem;
+      width: clamp(180px, 30vw, 340px); height: 3px;
+      background: rgba(245,197,24,0.22);
+      overflow: hidden;
+      border-radius: 2px;
+      opacity: 0; transition: opacity 0.4s ease 0.6s;
+    }
+    #transition-overlay.active .tr-bar-wrap { opacity: 1; }
+    .tr-bar {
+      height: 100%; width: 0%; background: var(--yellow);
+      box-shadow: 0 0 8px var(--yellow);
+      transition: width 1.8s cubic-bezier(0.4,0,0.2,1) 0.7s;
+    }
+    #transition-overlay.active .tr-bar { width: 100%; }
+
+    /* ── MOBILE RESPONSIVE ── */
+    @media (max-width: 768px) {
+      .title-hacker, .title-house { font-size: clamp(2.6rem, 12vw, 4.6rem); }
+      .title-goa { font-size: clamp(1.8rem, 9.5vw, 3.6rem); }
+      .task-main { font-size: clamp(1rem, 5vw, 1.7rem); }
+      #content { justify-content: flex-start; padding-top: 7vh; }
+      .title-block { margin-bottom: 1.2rem; }
+      .task-block  { margin-bottom: 1.4rem; }
+    }
+    @media (max-width: 430px) {
+      .title-hacker, .title-house { font-size: clamp(2.2rem, 13.5vw, 3.7rem); }
+      .task-main { font-size: clamp(0.9rem, 5.2vw, 1.4rem); }
+    }
+  </style>
 </head>
 <body>
-    <!-- ── Beach Background Landscape ──────────────── -->
-    <div class="beach-background" aria-hidden="true"></div>
 
-    <div class="app-shell">
+<div id="scene">
+  <img src="assets/layer1.png" id="layer1" class="img-layer" alt="Background" />
+  <img src="assets/layer2.png" id="layer2" class="img-layer" alt="Goa Horizon" />
+  <img src="assets/layer3.png" id="layer3" class="img-layer" alt="Beach Midground" />
+  <img src="assets/layer4.png" id="layer4" class="img-layer" alt="Left Portuguese Architecture" />
+  <img src="assets/layer5.png" id="layer5" class="img-layer" alt="Right Goa Architecture" />
+  <img src="assets/layer6.png" id="layer6" class="img-layer" alt="Foreground Palms Frame" />
+</div>
 
-        <!-- ── Header ───────────────────────────────────── -->
-        <header class="app-header">
-            <div class="header-inner">
-                <div class="header-left">
-                    <a href="https://x.com/247pmstudio" target="_blank" class="studio-logo" aria-label="2:47 PM Studio profile">
-                        <span class="logo-time">2:47<span class="logo-pm">PM</span></span>
-                        <span class="logo-text">STUDIO</span>
-                    </a>
-                </div>
-                <div class="brand-center">
-                    <div class="brand">
-                        <span class="brand-dot"></span>
-                        <h1 class="brand-name">Hacker <span class="brand-pink">गोवा</span> House</h1>
-                    </div>
-                    <p class="brand-sub">Voice Radar | Multilingual RAG</p>
-                </div>
-            </div>
-        </header>
-
-        <!-- ── Mode Switcher ─────────────────────────────── -->
-        <div class="mode-switcher-wrap">
-            <div class="mode-switcher" role="tablist" aria-label="Voice mode selection">
-                <button id="mode-hologram" class="mode-tab active" role="tab" aria-selected="true"
-                    aria-controls="hologram-panel" data-mode="hologram">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/>
-                    </svg>
-                    Hologram
-                </button>
-                <button id="mode-tap" class="mode-tab" role="tab" aria-selected="false"
-                    aria-controls="tap-panel" data-mode="tap">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
-                        <path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v4M8 23h8"/>
-                    </svg>
-                    Tap to Speak
-                </button>
-            </div>
-
-            <!-- Shared Voice Readout Toggle -->
-            <div class="shared-voice-controls">
-                <button id="hologram-tts-toggle" class="tts-toggle-btn active" title="Toggle text-to-speech feedback">
-                    <span class="tts-status-dot"></span>
-                    Voice Readout: On
-                </button>
-            </div>
-
-            <!-- Strategy selector (shared) -->
-            <div class="strategy-selector">
-                <label for="strategy-select" class="strategy-label">Strategy</label>
-                <select id="strategy-select" class="strategy-select">
-                    <option value="hybrid" selected>Hybrid (default)</option>
-                    <option value="fixed">Fixed-size</option>
-                    <option value="sentence">Sentence</option>
-                    <option value="metadata">Metadata-aware</option>
-                </select>
-            </div>
-        </div>
-
-        <!-- ── Main panels ───────────────────────────────── -->
-        <main class="main-content">
-
-            <!-- ═══════════════ HOLOGRAM MODE ═══════════════ -->
-            <section id="hologram-panel" class="mode-panel active" role="tabpanel" aria-labelledby="mode-hologram">
-                <div class="hologram-layout">
-
-                    <!-- Central animated orb -->
-                    <div class="hologram-center">
-                        <div class="hologram-rings-wrap" id="hologram-orb" aria-live="polite">
-                            <div class="h-ring h-ring-1"></div>
-                            <div class="h-ring h-ring-2"></div>
-                            <div class="h-ring h-ring-3"></div>
-                            <div class="h-core">
-                                <svg class="h-icon" id="hologram-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                                    <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
-                                    <path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v4M8 23h8"/>
-                                </svg>
-                            </div>
-                            <!-- Waveform bars (listening state) -->
-                            <div class="h-waveform" id="hologram-waveform">
-                                <span></span><span></span><span></span><span></span><span></span>
-                                <span></span><span></span><span></span><span></span><span></span>
-                            </div>
-                        </div>
-
-                        <p class="hologram-state-label" id="hologram-status">Ready to listen</p>
-
-                        <button id="hologram-mic-btn" class="hologram-action-btn" aria-label="Start listening">
-                            Tap to Speak
-                        </button>
-                        <button id="hologram-text-btn" class="hologram-text-btn" title="Type a query instead">
-                            Type a query
-                        </button>
-                        <button id="hologram-exit-session" class="hologram-exit-btn hidden" title="End continuous conversation">
-                            End conversation
-                        </button>
-                        <div class="hologram-voice-controls">
-                            <div class="wake-word-badge">
-                                <span class="wake-status-dot active"></span>
-                                Wake Word: "Hey Hacker House"
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Hologram answer display -->
-                    <div id="hologram-answer-wrap" class="hologram-answer hidden">
-                        <div class="answer-badge" id="hologram-refused-badge">Refusal</div>
-                        <p class="hologram-answer-text" id="hologram-answer-text"></p>
-                        <div class="hologram-meta-row">
-                            <span class="meta-chip" id="hologram-strategy-chip"></span>
-                            <span class="meta-chip" id="hologram-latency-chip"></span>
-                            <span class="meta-chip" id="hologram-chunks-chip"></span>
-                        </div>
-                    </div>
-
-                    <!-- Conversational History -->
-                    <div id="hologram-history-container" class="hologram-history-container hidden">
-                        <h3 class="history-title">Conversational History</h3>
-                        <div id="hologram-chat-history" class="hologram-chat-history"></div>
-                    </div>
-
-                    <!-- Sources Accordion -->
-                    <details class="sources-accordion hidden" id="hologram-sources-accordion">
-                        <summary class="sources-summary">
-                            <span>Show sources</span>
-                            <span class="sources-count" id="hologram-sources-count"></span>
-                        </summary>
-                        <div class="sources-body" id="hologram-sources-body"></div>
-                    </details>
-
-
-
-                </div>
-            </section>
-
-            <!-- ═══════════════ TAP TO SPEAK MODE ═══════════ -->
-            <section id="tap-panel" class="mode-panel" role="tabpanel" aria-labelledby="mode-tap">
-                <div class="tap-layout">
-
-                    <!-- Recording panel -->
-                    <div class="tap-record-area">
-                        <div class="tap-mic-container">
-                            <button id="tap-mic-btn" class="tap-mic-button" aria-label="Start recording">
-                                <svg class="tap-mic-icon" viewBox="0 0 24 24" fill="currentColor">
-                                    <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/>
-                                    <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/>
-                                </svg>
-                                <div class="tap-pulse"></div>
-                            </button>
-                            <div class="tap-mic-dashed-ring"></div>
-                        </div>
-                        <p class="tap-label" id="tap-label">Tap to Speak</p>
-
-                        <!-- Live transcription display -->
-                        <div id="tap-transcript-live" class="tap-transcript-live hidden">
-                            <div class="transcript-dot"></div>
-                            <span id="tap-transcript-text">Listening…</span>
-                        </div>
-
-                        <button id="tap-cancel-btn" class="tap-cancel-btn hidden">Cancel</button>
-                    </div>
-
-                    <!-- Results area -->
-                    <div id="tap-results" class="tap-results hidden">
-
-                        <!-- Question -->
-                        <div class="result-block">
-                            <p class="result-label">Your question</p>
-                            <p class="result-question" id="tap-question"></p>
-                        </div>
-
-                        <!-- Answer (with refusal badge) -->
-                        <div class="result-block answer-block" id="tap-answer-block">
-                            <div class="answer-block-header">
-                                <p class="result-label">Answer</p>
-                                <span class="refused-pill hidden" id="tap-refused-pill">Refused</span>
-                            </div>
-                            <p class="result-answer" id="tap-answer"></p>
-                            <div class="answer-meta" id="tap-answer-meta"></div>
-                        </div>
-
-                        <!-- Sources accordion -->
-                        <details class="sources-accordion" id="tap-sources-accordion">
-                            <summary class="sources-summary">
-                                <span>Show sources</span>
-                                <span class="sources-count" id="tap-sources-count"></span>
-                            </summary>
-                            <div class="sources-body" id="tap-sources-body"></div>
-                        </details>
-
-                    </div>
-
-                    <!-- Text input fallback -->
-                    <div class="tap-text-fallback">
-                        <input type="text" id="tap-text-input" class="tap-text-input"
-                            placeholder="Or type your query here…" autocomplete="off">
-                        <button id="tap-text-submit" class="tap-text-submit">Ask</button>
-                    </div>
-
-                </div>
-            </section>
-
-        </main>
-
-
-
-        <!-- ── Footer ────────────────────────────────────── -->
-        <footer class="app-footer">
-            <p>© 2026 HH Goa Voice Radar · RUN 3 · <span id="footer-strategy"></span></p>
-        </footer>
-
+<!-- ════════════════════════════════════
+     CONTENT OVERLAY (GUARANTEED ON TOP)
+     ════════════════════════════════════ -->
+<div id="content">
+  <div class="title-block">
+    <span class="title-hacker">HACKER</span>
+    <span class="title-house">HOUSE</span>
+    <div class="title-row-goa">
+      <span class="title-goa">Goa</span>
+      <span class="title-year">&nbsp;&#8226;&nbsp;2026</span>
     </div>
+  </div>
 
-    <script src="app.js"></script>
+  <div class="task-block">
+    <span class="task-label">Task 2 &nbsp;&#8226;&nbsp; Prototype</span>
+    <span class="task-main">Voice-Enabled RAG Model</span>
+  </div>
+
+  <button id="enter-btn" aria-label="Enter the prototype">ENTER &rarr;</button>
+</div>
+
+<!-- ════════════════════════════════════
+     TRANSITION OVERLAY
+     ════════════════════════════════════ -->
+<div id="transition-overlay" role="status" aria-live="polite">
+  <div class="tr-heading">ENTERING&hellip;</div>
+  <div class="tr-sub">HACKER HOUSE GOA &nbsp;&#8226;&nbsp; 2026</div>
+  <div class="tr-bar-wrap">
+    <div class="tr-bar"></div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════
+     JAVASCRIPT
+     ════════════════════════════════════ -->
+<script>
+  // ── REDIRECT TARGET ──────────────────────────────────
+  const TARGET_URL = "home.html";
+
+  // ── CHROMACLEAR CHECKERBOARD REMOVER ─────────────────
+  function removeCheckerboard(imgId) {
+    return new Promise((resolve) => {
+      const imgEl = document.getElementById(imgId);
+      if (!imgEl) return resolve();
+
+      const tempImg = new Image();
+      tempImg.src = imgEl.src;
+      
+      const processCanvas = () => {
+        try {
+          const canvas = document.createElement('canvas');
+          canvas.width = tempImg.naturalWidth || 1920;
+          canvas.height = tempImg.naturalHeight || 1080;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(tempImg, 0, 0);
+
+          const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+          const data = imgData.data;
+
+          for (let i = 0; i < data.length; i += 4) {
+            const r = data[i];
+            const g = data[i+1];
+            const b = data[i+2];
+
+            const max = Math.max(r, g, b);
+            const min = Math.min(r, g, b);
+            const diff = max - min;
+
+            // Remove neutral grey/white checkerboard squares
+            if (diff < 8 && r > 180 && g > 180 && b > 180) {
+              data[i+3] = 0; // Set to transparent
+            }
+          }
+
+          ctx.putImageData(imgData, 0, 0);
+          imgEl.src = canvas.toDataURL();
+        } catch (err) {
+          console.warn('Canvas filtering notice:', err);
+        }
+        resolve();
+      };
+
+      if (tempImg.complete) {
+        processCanvas();
+      } else {
+        tempImg.onload = processCanvas;
+        tempImg.onerror = () => resolve();
+      }
+    });
+  }
+
+  // ── INITIALIZE & TRIGGER SLOW OVERLAPPING ANIMATIONS ──
+  async function initScene() {
+    // Process transparency on overlay layers
+    await Promise.all([
+      removeCheckerboard('layer2'),
+      removeCheckerboard('layer3'),
+      removeCheckerboard('layer4'),
+      removeCheckerboard('layer5'),
+      removeCheckerboard('layer6')
+    ]);
+
+    // Start cinematic slow staggered overlapping sequence
+    document.body.classList.add('scene-ready');
+  }
+
+  // Start initialization immediately
+  if (document.readyState === 'complete') {
+    initScene();
+  } else {
+    window.addEventListener('load', initScene);
+    // Fallback safety timeout so animations always play even if an asset is delayed
+    setTimeout(() => {
+      document.body.classList.add('scene-ready');
+    }, 150);
+  }
+
+  // ── ENTER BUTTON CLICK ────────────────────────────────
+  const btn     = document.getElementById('enter-btn');
+  const overlay = document.getElementById('transition-overlay');
+
+  btn.addEventListener('click', () => {
+    btn.disabled = true;
+    setTimeout(() => {
+      overlay.classList.add('active');
+      setTimeout(() => {
+        window.location.href = TARGET_URL;
+      }, 2300);
+    }, 80);
+  });
+
+  btn.addEventListener('keydown', e => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      btn.click();
+    }
+  });
+
+  // ── DESKTOP MOUSE PARALLAX ───────────────────────────
+  if (!window.matchMedia('(max-width: 768px)').matches) {
+    const layers = [
+      { el: document.getElementById('layer2'), s: 0.012 },
+      { el: document.getElementById('layer3'), s: 0.022 },
+      { el: document.getElementById('layer4'), s: 0.035 },
+      { el: document.getElementById('layer5'), s: 0.035 },
+      { el: document.getElementById('layer6'), s: 0.055 },
+    ];
+    let tx = 0, ty = 0, cx = 0, cy = 0;
+    document.addEventListener('mousemove', e => {
+      tx = e.clientX / window.innerWidth  - 0.5;
+      ty = e.clientY / window.innerHeight - 0.5;
+    });
+    (function loop() {
+      cx += (tx - cx) * 0.05;
+      cy += (ty - cy) * 0.05;
+      layers.forEach(({ el, s }) => {
+        if (el) {
+          el.style.transform =
+            `translate(${cx * window.innerWidth * s}px, ${cy * window.innerHeight * s}px)`;
+        }
+      });
+      requestAnimationFrame(loop);
+    })();
+  }
+</script>
+
 </body>
 </html>
