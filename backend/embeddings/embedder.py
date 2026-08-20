@@ -13,16 +13,14 @@ def get_embedding_model():
         # Force CPU device to avoid MPS/CUDA overhead
         model = SentenceTransformer(EMBEDDING_MODEL_NAME, device="cpu")
         
-        # Apply 8-bit dynamic quantization to keep memory footprint low
+        # Cast to bfloat16 to cut memory footprint in half (~230MB)
         import torch
         import gc
         try:
-            model = torch.quantization.quantize_dynamic(
-                model, {torch.nn.Linear}, dtype=torch.qint8
-            )
-            print("Embedding model dynamically quantized to 8-bit successfully.")
-        except Exception as q_err:
-            print(f"Dynamic quantization skipped: {q_err}")
+            model = model.to(torch.bfloat16)
+            print("Embedding model cast to bfloat16 successfully.")
+        except Exception as err:
+            print(f"Failed to cast to bfloat16: {err}")
             
         _model = model
         gc.collect()
