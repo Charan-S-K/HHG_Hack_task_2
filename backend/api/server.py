@@ -169,11 +169,24 @@ def _pipeline_result_to_response(r: PipelineResult) -> QueryResponse:
 def get_status():
     """Health check / status endpoint."""
     commit_hash = "unknown"
-    try:
-        import subprocess
-        commit_hash = subprocess.check_output(["git", "rev-parse", "--short", "HEAD"], text=True).strip()
-    except Exception:
-        pass
+    
+    # Try reading from a built commit.txt file first
+    commit_file = os.path.join(os.path.dirname(__file__), "commit.txt")
+    if os.path.exists(commit_file):
+        try:
+            with open(commit_file, "r") as f:
+                commit_hash = f.read().strip()
+        except Exception:
+            pass
+            
+    # Fallback to calling git
+    if commit_hash == "unknown":
+        try:
+            import subprocess
+            commit_hash = subprocess.check_output(["git", "rev-parse", "--short", "HEAD"], text=True).strip()
+        except Exception:
+            pass
+            
     return {
         "status": "online",
         "service": "HH Goa Voice Radar",
