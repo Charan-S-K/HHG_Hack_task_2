@@ -16,7 +16,7 @@ const BACKEND_URL = window.location.protocol === 'file:'
     ? 'http://127.0.0.1:8000'
     : (window.location.origin.includes('localhost') || window.location.origin.includes('127.0.0.1')
         ? ''
-        : 'https://hh-goa-voice-radar.onrender.com');
+        : ' https://binarybytes.onrender.com');
 
 // ═══════════════════════════════════════════════════════════
 // State
