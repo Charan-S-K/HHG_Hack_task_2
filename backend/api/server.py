@@ -168,10 +168,17 @@ def _pipeline_result_to_response(r: PipelineResult) -> QueryResponse:
 @app.get("/api/status")
 def get_status():
     """Health check / status endpoint."""
+    commit_hash = "unknown"
+    try:
+        import subprocess
+        commit_hash = subprocess.check_output(["git", "rev-parse", "--short", "HEAD"], text=True).strip()
+    except Exception:
+        pass
     return {
         "status": "online",
         "service": "HH Goa Voice Radar",
         "environment": "RAG RUN 2",
+        "commit": commit_hash,
         "default_strategy": RETRIEVAL_STRATEGY,
         "available_strategies": VALID_STRATEGIES_LIST,
     }
