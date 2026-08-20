@@ -197,6 +197,24 @@ def get_status():
     }
 
 
+@app.get("/api/test-quant")
+def test_quant():
+    try:
+        from sentence_transformers import SentenceTransformer
+        import torch
+        # Load a small model to test quantization
+        model = SentenceTransformer("intfloat/multilingual-e5-small", device="cpu")
+        try:
+            q_model = torch.quantization.quantize_dynamic(
+                model, {torch.nn.Linear}, dtype=torch.qint8
+            )
+            return {"status": "success", "msg": "quantized successfully"}
+        except Exception as e:
+            return {"status": "failed", "msg": f"quantization failed: {e}"}
+    except Exception as e:
+        return {"status": "error", "msg": str(e)}
+
+
 @app.post("/api/stt")
 async def handle_stt(file: UploadFile = File(...)):
     """
