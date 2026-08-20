@@ -34,7 +34,19 @@ def transcribe_audio(audio_bytes: bytes, filename: str = "audio.wav", timeout: i
     url = "https://api.sarvam.ai/speech-to-text"
     headers = {"api-subscription-key": api_key.strip()}
 
-    files = {"file": (filename, audio_bytes, "audio/wav")}
+    # Determine correct MIME type from filename extension
+    ext = os.path.splitext(filename)[1].lower()
+    mime_type = "audio/wav"
+    if ext == ".webm":
+        mime_type = "audio/webm"
+    elif ext in (".ogg", ".opus"):
+        mime_type = "audio/ogg"
+    elif ext in (".mp4", ".m4a"):
+        mime_type = "audio/mp4"
+    elif ext == ".mp3":
+        mime_type = "audio/mpeg"
+
+    files = {"file": (filename, audio_bytes, mime_type)}
     data  = {"model": "saaras:v3", "mode": "transcribe"}
 
     logger.info("Sarvam STT request: %d bytes, file=%s", len(audio_bytes), filename)

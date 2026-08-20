@@ -131,6 +131,7 @@ function switchMode(targetMode) {
 
 async function startRecording(mode) {
     state.audioChunks = [];
+    state.recordingStartTime = Date.now();
 
     try {
         state.stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -149,6 +150,11 @@ async function startRecording(mode) {
 
     state.mediaRecorder.onstop = async () => {
         releaseMic();
+        const duration = Date.now() - (state.recordingStartTime || 0);
+        if (duration < 1000) {
+            handleRecordError(mode, 'Recording too short. Please speak for at least 1 second.');
+            return;
+        }
         const audioBlob = new Blob(state.audioChunks, { type: state.mediaRecorder.mimeType || 'audio/webm' });
         await processAudio(audioBlob, mode);
     };

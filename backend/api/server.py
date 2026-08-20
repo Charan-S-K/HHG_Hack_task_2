@@ -190,7 +190,25 @@ async def handle_stt(file: UploadFile = File(...)):
             raise HTTPException(status_code=400, detail="Uploaded audio file is empty.")
 
         from backend.stt.sarvam_stt import transcribe_audio
-        transcript, language_code = transcribe_audio(audio_bytes, filename=file.filename)
+        import time
+
+        last_exc = None
+        max_attempts = 3
+        transcript, language_code = None, None
+
+        for attempt in range(max_attempts):
+            try:
+                transcript, language_code = transcribe_audio(audio_bytes, filename=file.filename)
+                break
+            except Exception as exc:
+                last_exc = exc
+                logger.warning(
+                    "STT attempt %d failed — %s: %s. Retrying in 0.5s...",
+                    attempt + 1, type(exc).__name__, exc
+                )
+                time.sleep(0.5)
+        else:
+            raise last_exc
 
         if language_code:
             code = language_code.split("-")[0].lower()
